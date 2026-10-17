@@ -1,5 +1,5 @@
 /* FIELDNOTES v3.5: cache public app shell only; never store personal photos */
-const CACHE='fieldnotes-v36-shell-20261017';
+const CACHE='fieldnotes-v36-shell-20261017-android-nativepicker-1';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./v36.css','./v36-app.js','./data/china-index-v36.js','./data/china-county-v36.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('fieldnotes-v')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});

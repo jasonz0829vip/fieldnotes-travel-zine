@@ -171,9 +171,9 @@ function regenerate(reason){
  generate();
 }
 function init(){
- $36('v36Upload').addEventListener('click',()=>$36('photoFile').click());
- $36('v36Camera').addEventListener('click',()=>$36('v36CameraInput').click());
- $36('v36CameraInput').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;photoFile(f);waitPhoto(f);e.target.value='';});
+ // Direct native file inputs prevent Android WebView from blocking scripted clicks.
+ $36('v36NativeUpload').addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;photoFile(file);waitPhoto(file);e.target.value='';});
+  $36('v36CameraInput').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;photoFile(f);waitPhoto(f);e.target.value='';});
  $36('photoFile').addEventListener('change',e=>{const f=e.target.files?.[0];if(f)waitPhoto(f);});
  // Watch the existing editor's photo metadata, so first import works even if the legacy handler runs before this listener.
  let lastShownImage=null;

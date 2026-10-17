@@ -207,8 +207,8 @@ not authoritative GPS positions or turn-by-turn navigation data.
  <div class="v36-grid">
   <section class="v36-panel" aria-label="第一步导入照片">
    <h2>01 · 你的旅行照片</h2>
-   <div class="v36-upload"><button id="v36Camera" class="v36-pill primary" type="button">📷 直接拍照<small>手机打开相机</small></button><button id="v36Upload" class="v36-pill" type="button">＋ 选择照片<small>相册 / Windows 文件</small></button></div>
-   <input id="v36CameraInput" type="file" accept="image/*" capture="environment" hidden>
+   <div class="v36-upload"><label id="v36Camera" class="v36-pill primary v36-file-native">📷 直接拍照<small>手机打开相机</small><input id="v36CameraInput" type="file" accept="image/*" capture="environment" aria-label="Camera upload"></label><label id="v36Upload" class="v36-pill v36-file-native">＋ 选择照片<small>相册 / Windows 文件</small><input id="v36NativeUpload" type="file" accept="image/*,.heic,.heif" aria-label="Select photo from album"></label></div>
+
    <div id="v36Initial" class="v36-helper">图片只在设备本地处理，不上传云端，也不重新生成照片中的人物和建筑。</div>
    <div id="v36Picture" class="v36-picture" hidden><canvas id="v36Original" aria-label="刚导入的旅行原始照片"></canvas><div id="v36Filename" class="v36-picture-note"></div></div>
   </section>
@@ -236,7 +236,7 @@ not authoritative GPS positions or turn-by-turn navigation data.
 </section>
 
 <main class="layout">
- 
+
 <section class="v33MobileOptions" aria-label="手机快捷操作">
  <div class="v33Sub" id="v33MobileAdvice"><b>先选照片，再看 3 种真实方案</b> · 系统会根据照片建议哪种排版</div>
  <div class="v33OptionRow">
@@ -245,7 +245,7 @@ not authoritative GPS positions or turn-by-turn navigation data.
    <button data-v32variant="frame" type="button">外置版头<small>保留全部照片</small><span class="v32-reco"></span></button>
    <button id="v35SidecarMobile" type="button" class="v35-mobile-sidecar">画册侧栏<small>地图放在照片外</small></button>
  </div>
- 
+
  <div class="v34MobileTools" aria-label="摄影主体保护和工程备份">
   <button type="button" id="v34ProtectQuick">🛡 框选主体</button>
   <button type="button" id="v34ClearQuick">清除保护</button>

@@ -1,3 +1,6 @@
+## Android V3.6 - Native file picker compatibility fix (2026-10-17)
+Photo upload and direct camera capture use full-size native file inputs instead of scripts clicking hidden file elements. Service-worker cache version bumped for PWA update. If an Android in-app browser still blocks file picker, open the site using Chrome. Photos remain on device.
+
 # FIELDNOTES V3.6 · 全国地理一键旅行摄影
 
 手机访问：https://jasonz0829vip.github.io/fieldnotes-travel-zine/

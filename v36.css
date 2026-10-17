@@ -82,3 +82,10 @@ body.v36-basic .top-right{display:none!important}
  .v36-controls button{min-width:125px}
 }
 @media (max-width:380px){.v36-option canvas{height:80px}.v36-title h1{font-size:27px}}
+/* Android/Chromium native file picker: real file control covers the visible tap target. */
+.v36-file-native{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;overflow:hidden;touch-action:manipulation}
+.v36-file-native>input[type="file"]{position:absolute;inset:0;width:100%;height:100%;opacity:0;display:block!important;cursor:pointer;z-index:3;font-size:35px;-webkit-tap-highlight-color:transparent}
+.v36-file-native:focus-within{outline:3px solid #779b78;outline-offset:2px}
+
+/* Keep location suggestions in normal flow: never cover the one-click Generate button. */
+#v36Flow .v36-fieldset #v36Choices{position:relative;top:auto;left:auto;right:auto;margin-top:7px;max-height:min(240px,40vh);overflow-y:auto}
