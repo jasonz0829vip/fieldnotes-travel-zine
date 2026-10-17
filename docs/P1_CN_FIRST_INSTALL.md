@@ -1,50 +1,49 @@
-# P1｜中国普通网络首次使用：国内发布决策与交付包
+# P1｜国内首次安装、离线地区包与存储清理（2026-10-18）
 
-## 结论（2026-10-18）
+## 当前状态（不能提前宣布 P1 完成）
 
-1. FIELDNOTES 当前 V3.8-P1 的离线计算已经独立于海外服务；但首次安装仍需要一个真实可到达的 HTTPS URL。
-2. `GitHub Pages` 作为开发预览可以保留，但不能仅凭美国/代理侧 HTTP 200 宣称中国普通微信、Safari、Chrome 可访问。
-3. 不把 QLS/3070 暴露公网，不要求父母妻子连 VPN、代理、Tailscale、RustDesk，也不要求你的两台电脑在线。
-4. **优先复用已有的、拥有合法授权的、在中国普通网络可稳定访问的 HTTPS 静态站点**，发布纯静态页面即可。项目按根目录部署。
-5. 如需中国大陆 CDN 加速域名，通常需要有效 ICP 备案；没有已备案域名/账号，不要靠申请海外静态网站谎报 P1 完成。
+- V3.8-P1 的基础照片编辑及全国行政区轮廓无需远程 API；国内手机首次打开仍必须有可访问的 HTTPS 网页入口，或另行封装安装包。
+- 用户没有自有网站或备案域名。**目前没有已验证的、免费无域名且国内长期稳定的 iPhone/Android 共用发布入口**；不得用海外代理侧 HTTP 200 代替国内真机测试。
+- 新建独立 P1 存储管理分支：三个精细街道包从原本单一 `offline-tiles-v38.js` 分拆成独立 `packs/469028.js`（陵水）、`packs/310101.js`（上海黄浦）、`packs/610113.js`（西安雁塔）。
+- **网页版**首次打开只缓存基础程序、行政区划；精细街道由用户逐地区下载。已下载街道放进每地区独立 Cache Storage。删除单个地区不会删除基础制图；程序更新不会顺带误删地区缓存。
+- **Windows file:// 版**将三个街道文件随 ZIP 放在磁盘：浏览器无法删除磁盘文件，需用户在文件管理器删除 packs/ 中对应文件，或直接删除整个解压文件夹。
+- 页面“离线地图 / 存储管理”支持查看各地区缓存大小、逐地区删除、删除全部街道地图、清除本版本 PWA 离线程序与地图。全部清理不会直接卸载手机主屏幕图标，也不会删除已导出的系统相册照片和本地下载的工程文件。
+- 浏览器 HTTP 磁盘缓存属于浏览器管理，不保证随着 Cache Storage 删除即时释放；若要彻底清除，仍可在系统浏览器网站数据中清除对应站点。存储空间估值可能包括该域名的其他版本。
 
-## 交付物
+## 新的静态分发产物
 
-`preview/v38-p1/downloads/FIELDNOTES_V3.8_P1_Domestic_Static_Deploy.zip`
+由 `preview/v38-p1/tools/build_domestic_static.py` 生成：
 
-ZIP 解压内容包含 `index.html`、对应 JS/CSS、`data/`、`icons/`、`licenses/`、`sw.js`、`manifest.webmanifest`、`offline-tiles-v38.js`，没有个人照片、密钥、GitHub token 或后端服务。
+`preview/v38-p1/downloads/FIELDNOTES_V3.8_P1_Managed_Maps_Static_Deploy.zip`
 
-`preview/v38-p1/tools/build_domestic_static.py` 可以在 QLS 和 RTX3070 使用同一份 Python 脚本重复构建。
+**注意：新的 ZIP 需要实际执行构建脚本后才存在；旧 `FIELDNOTES_V3.8_P1_Domestic_Static_Deploy.zip` 仍是单体街道包，不具备逐地区删除能力。不要拿旧包当新包部署。**
 
-## 可选的正式分发路径
+构建步骤（QLS、RTX3070 使用相同脚本；不需要公网服务器）：
 
-| 方案 | 国内首装 | 难度 | 前置条件 |
-|---|---|---|---|
-| 复用家人/公司已授权的**备案 HTTPS 网站**中的 FIELDNOTES 目录或独立子域名 | 首选，待真机测 | 低 | 网站管理员同意、站点支持上传静态文件和 PWA 路径 |
-| 腾讯云 EdgeOne Pages / 阿里云 ESA **国内加速** | 可行但待验收 | 中 | 已备案域名、服务商账号、对应发布配置 |
-| 微信小程序 | 长期备选；原生相册保存较明确 | 中高 | 小程序主体/审核/开发适配；不等于当前 H5 可直接打包 |
-| GitHub Pages / Render / 其他境外免费静态托管 | 开发测试 | 低 | **不能据此保证中国普通手机无代理能用** |
+1. 可选执行 `node preview/v38-p1/tools/split_offline_packs.cjs`，从旧 V3.8 街道包离线重建三份独立地图数据；无需访问国外地图源。
+2. 运行 `node preview/v38-p1/tools/test_managed_packs.cjs`，检查地图数据校验、区域包管理与离线恢复。
+3. 运行 `python preview/v38-p1/tools/build_domestic_static.py`，核对 ZIP 清单与 SHA256。
+4. 部署时解压，必须保留 `index.html`、`sw.js`、`packs/`、`data/`、`icons/`、`licenses/`，并通过 HTTPS 提供所有文件。
 
-腾讯 EdgeOne 官方：[Pages 访问及备案规则](https://edgeone.cloud.tencent.com/pages/document/175191784523485184)，[域名 ICP 说明](https://edgeone.ai/zh/document/63620)。
+## 不拥有域名时的选择
 
-阿里云官方：[ESA 国内加速使用限制](https://help.aliyun.com/zh/edge-security-acceleration/esa/product-overview/limits-on-using-esa)。
+| 路径 | 现实边界 | 本阶段处理 |
+|---|---|---|
+| 原有 GitHub Pages 预览 | 免费，但未证实国内普通网络长期可靠 | 保留开发预览；国内无代理真机测试可作为第一步 |
+| 腾讯云 CloudBase 默认域名 | 官方明确仅限开发测试，有安全提示中间页、限流等，不可当家人正式入口 | 仅供可行性测试，若不符合需求立即停止 |
+| 安卓离线 APK（Capacitor 等成熟封装） | 不需要域名；须验证 Android WebView 的相册导出、离线地区包与安装更新 | 有价值的下一路线，尚未封装与签名 |
+| iPhone 原生发布 | 无域名也能做，但分发涉及 Apple 签名、审核或开发者权益；TestFlight 测试包会到期 | 不承诺免费永久可装 |
+| 正式大陆 HTTPS 网站（备案域名） | 相对稳定但需要合法域名、托管与备案 | 用户目前没有，不能假设已有 |
 
-腾讯云 COS 官方：[2024 年后新存储桶不能用默认静态网站域名当正常网页发布入口](https://cloud.tencent.cn/document/product/436/32670)。
+官方文档：[CloudBase 默认域名限制](https://docs.cloudbase.net/service/alias)、[iPhone Safari 添加主屏幕网页 App](https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios)、[TestFlight 90 天有效期](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/)。
 
-## 部署步骤（网站运营者仅需操作一次）
+## 必须通过的真实设备验收
 
-1. 拿到具备权限的国内可访问的 HTTPS 静态站点；确认域名和备案/服务商要求符合规定。
-2. 下载上面的 ZIP，**解压**，把 ZIP 里的内容上传到站点根目录，保持 `index.html` 在首页位置；不可只上传 ZIP 文件。
-3. 检查 MIME：`text/html`、`application/javascript`、`text/css`、`image/png` 和 `application/manifest+json`。
-4. 中国普通网络真机访问 → 等待 Service Worker 完成缓存 → 关闭浏览器/主屏幕 App → 飞行模式 → 重启 → 上传相片 → 选择已打包街道范围 → 生成 → 保存。
-5. 在安卓微信中 **真实相册保存** 和 iPhone 微信原来已经正常的分享/保存路径分别验收，不把桌面手机模拟验收当真机成功。
+1. **国内无代理安卓 + iPhone**：普通手机网络首次打开、拍照/导入、生成、保存到相册；记录设备型号、系统/浏览器及实际照片保存结果。
+2. 只下载上海黄浦街道包；用飞行模式关闭并重启 App 后再次生成；不能有国外地图 API 请求。
+3. 在存储管理里删掉上海包，证明该缓存真实消失。断网重新打开，基本行政区轮廓仍可出图，且不会在背后重新下载上海。
+4. 删除所有地图包，基础编辑可用；清除本版本离线程序后应明确提示必须联网重新安装。
+5. 不能删除其他版本的 Service Worker/cache，也不能删相册作品和工程文件。
+6. Android 微信真实相册保存与 iPhone Safari/微信原有分享/保存各自验收，模拟器或 Node 测试不能替代真机。
 
-## 离线地图边界
-
-地区名称/行政区边界库是全国范围；细街道离线包当前仅预装少量小范围地区（海南陵水、上海黄浦、西安雁塔附近），不能宣传全国细街网离线。没有包的地方按现有逻辑回退真实行政边界。
-
-## 单独需要用户确认的信息
-
-*是否已有一个可由本人合法发布内容的、已备案且中国普通网络可访问的 HTTPS 域名/网站？*
-
-如有，只需一次授权接入和上传；**家人的日常制图不需要再次配置网络**。如没有，不能凭空替用户创建已备案网站，需选择正式域名备案或微信小程序的接入路线。
+当前属于**功能改造与自动化测试阶段**，不代表国内手机首次安装入口问题解决或 P1 验收完成。
