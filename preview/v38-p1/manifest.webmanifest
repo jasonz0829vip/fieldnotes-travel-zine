@@ -1,0 +1,25 @@
+{
+  "name": "FIELDNOTES V3.8 P1 · 摄影地理美学预览",
+  "short_name": "FIELDNOTES",
+  "description": "精选独立视觉设计 + 离线真实街道 + 原图保护",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#f7f6f2",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

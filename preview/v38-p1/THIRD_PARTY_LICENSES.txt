@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2025 圈集 (Supeset/China-GeoData)
+Copyright (c) 2024 ChuXiao (zhChuXiao/ChinaGeoJson)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Natural Earth geometry: public domain; cartographic approximations.
+
+V3.6 area names: mumuy/data_location (MIT), https://github.com/mumuy/data_location.
+City/county boundaries: zhChuXiao/ChinaGeoJson (MIT), https://github.com/zhChuXiao/ChinaGeoJson.
+Provincial boundaries: Supeset/China-GeoData (MIT), https://github.com/Supeset/China-GeoData.
+Source datasets have different dates; not all names have corresponding current boundaries.
+
+FIELDNOTES V3.8 local vector street bundles:
+OpenFreeMap © OpenMapTiles Data from OpenStreetMap
+Tile hosting: https://openfreemap.org/ (offline downloads policy applies).
+OpenStreetMap contributors: © OpenStreetMap, data under ODbL 1.0 (https://www.openstreetmap.org/copyright).
+OpenMapTiles vector tile schema: https://openmaptiles.org/
+JavaScript vector decoding bundled from @mapbox/vector-tile (BSD-3-Clause) and pbf (BSD-3-Clause).
+pinyin-pro transliteration library: MIT; esbuild development bundler: MIT.
+All third-party attributions must be retained when redistributing the offline package.
+
+--- FIELDNOTES V3.8 additional runtime attributions ---
+Map geometry and street/waterway data: © OpenStreetMap contributors, licensed under ODbL 1.0. See https://www.openstreetmap.org/copyright
+Cartographic tiles: OpenFreeMap / OpenMapTiles. Refer to their original attribution and redistribution policies.
+Bundled @mapbox/vector-tile (BSD-3-Clause), pbf (BSD-3-Clause), pinyin-pro (MIT) code. Full notices: licenses/ directory.
+These street tiles cover only the specifically shipped regions, not nationwide street-level map data.
