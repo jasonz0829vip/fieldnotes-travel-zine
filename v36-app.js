@@ -117,7 +117,7 @@ function photoLoaded(){
  if(state.gpsFromPhoto)syncRegionFromGPS();
  else{const p=$36('v36Location').value.trim();if(p){const hit=rank(p)[0];if(hit)applyRecord(hit);}}
 }
-const keys=['v35Sidecar','v32NoMap','v32Micro','frameMode','styleMode','theme','area','opacity','wash','typeScale','posX','posY','v32BeforePreview','guides','rotation','v32Tone','v32Exposure','v32Contrast','v32Saturation','v32Warm','viewMode'];
+const keys=['v35Sidecar','v32NoMap','v32Micro','frameMode','styleMode','theme','area','opacity','wash','typeScale','posX','posY','v32BeforePreview','guides','rotation','v32Tone','v32Exposure','v32Contrast','v32Saturation','v32Warm','viewMode','v37Preset'];
 function snapshot(){return Object.fromEntries(keys.map(k=>[k,state[k]]));}
 function configure(o){Object.assign(state,o);state.guides=false;state.v32BeforePreview=false;}
 function dimsFor(){return state.v35Sidecar?v35PanelDims():state.frameMode?v31FrameDims():{w:state.photoW,h:state.photoH};}
@@ -127,6 +127,7 @@ function drawVariant(c,cfg,width){
  }finally{Object.assign(state,old);}
 }
 function planConfigs(){
+ if(typeof window.FIELDNOTES_V37_PLAN==='function')return window.FIELDNOTES_V37_PLAN({round:drawRound,feedback,analysis:state.v32Analysis});
  const a=state.v32Analysis||v32Analyze({keepChoice:true});
  const busy=!a||a.texture>32||a.lowTexture>33;const spot=a?.best||{x:.30,y:.65},round=drawRound%5;
  const colors=['ivory','ink','blue','sage','rose'];
@@ -146,14 +147,16 @@ function selectVariant(i){
  $36('v36SelectedLabel').textContent=v.label+' · '+v.desc;
  drawVariant($36('v36Hero'),v.cfg,Math.min(1100,Math.max(660,Math.round(state.photoW*.75))));schedule();
 }
-function generate(){
+async function generate(){
  if(generating)return;
  if(!state.image){status('请先拍照或上传照片。',true);return;}
  const q=$36('v36Location').value.trim();
  if(q&&(!chosen||chosen.name!==q)){const matches=rank(q);if(matches.filter(r=>clean(r.name)===clean(q)).length>1){status('这个地名在多个城市存在，请先在建议列表中选择正确的省市。',true);showSuggestions(q);return;}const r=matches[0];if(r)applyRecord(r);else{status('地名未能离线识别，请改用省、市或区县名称。',true);return;}}
  if(!chosen&&(state.centerLat==null||state.centerLon==null)){status('还缺拍摄地点。可以只填省，不要求填写市或区。',true);$36('v36Location').focus();return;}
  generating=true;$36('v36Generate').disabled=true;
+ const oldGenerateLabel=$36('v36Generate').textContent;$36('v36Generate').textContent='正在绘制真实地图…';
  try{
+  if(window.FIELDNOTES_V37_PREPARE)await window.FIELDNOTES_V37_PREPARE();
   if($36('v36AutoTone').checked){if(state.v32Analysis)v32AutoTone();}else v32SetTone('original');
   variants.splice(0,variants.length,...planConfigs());const out=$36('v36Options');out.replaceChildren();
   variants.forEach((o,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='v36-option';
@@ -162,7 +165,7 @@ function generate(){
   $36('v36Results').hidden=false;selectVariant(0);
   status('已生成第 '+(drawRound+1)+' 组：3 种真实本地合成。原照片未重画，地理精度按数据标注。');
   $36('v36Results').scrollIntoView({block:'start',behavior:'smooth'});
- }catch(e){status('合成失败：'+e.message,true);console.error(e);}finally{generating=false;$36('v36Generate').disabled=false;}
+ }catch(e){status('合成失败：'+e.message,true);console.error(e);}finally{generating=false;$36('v36Generate').disabled=false;$36('v36Generate').textContent=oldGenerateLabel;}
 }
 function regenerate(reason){
  feedback=reason;drawRound++;const messages={balanced:'替换构图与地图配色',original:'更多保留原片',editorial:'增强杂志感',outside:'地图放照片外',soft:'更柔和的配色',map:'地图更明显'};

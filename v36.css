@@ -89,3 +89,7 @@ body.v36-basic .top-right{display:none!important}
 
 /* Keep location suggestions in normal flow: never cover the one-click Generate button. */
 #v36Flow .v36-fieldset #v36Choices{position:relative;top:auto;left:auto;right:auto;margin-top:7px;max-height:min(240px,40vh);overflow-y:auto}
+
+/* V3.7: no giant external geography mats in one-click travel designs. */
+body .v35-sidecar-option,body #v35SidecarMobile,body .frame-option,body [data-v32variant="frame"]{display:none!important}
+body .v36-title p{max-width:560px}

@@ -55,3 +55,6 @@ Service Worker 缓存版本更新以保证安卓下载到新版脚本。
 
 ## Android WeChat long-press image flow
 Android WeChat uses a standalone JPEG image display generated locally from the final PNG, for the WeChat long-press Save Image UI. Only Android+MicroMessenger executes it; Apple and Android Chrome paths are unchanged. Saving to an actual Android phone album depends on Tencent WeChat X5 and must be verified on physical hardware. High-res PNG fallback is retained; no photos are sent to servers.
+
+## V3.7 Real Cartography
+12 differentiated in-photo cartographic styles. OpenFreeMap OSM real vector streets, rivers, parks and English labels. First use online; viewed tiles cached for reuse offline. Province-level selection does not pretend to have street-level GPS detail. © OpenMapTiles/© OpenStreetMap attribution embedded. Phone save flows left unchanged.
