@@ -27,6 +27,13 @@ jobs:
           git diff --exit-code -- preview/v38-p1/packs/
       - name: Run offline cache management tests
         run: node preview/v38-p1/tools/test_managed_packs.cjs
+      - name: Browser smoke test (real headless Chromium, without third-party install scripts)
+        run: |
+          npm install --no-save --ignore-scripts --prefix preview/v38-p1/tools playwright@1.56.1
+          if [ ! -x /usr/bin/google-chrome ] && [ ! -x /usr/bin/chromium ] && [ ! -x /usr/bin/chromium-browser ]; then
+            preview/v38-p1/tools/node_modules/.bin/playwright install chromium
+          fi
+          node preview/v38-p1/tools/test_managed_packs_browser.cjs
       - name: Build isolated domestic static bundle
         run: python3 preview/v38-p1/tools/build_domestic_static.py
       - name: Assert deploy ZIP preserves opt-in maps and excludes obsolete monolith
