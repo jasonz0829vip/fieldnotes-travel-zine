@@ -73,7 +73,7 @@
     if (!keys.includes(packCache(spec))) return null;
     const response = await (await caches.open(packCache(spec))).match(packUrl(spec));
     if (!response) return null;
-    const blob = await response.blob();
+    const blob = await response.clone().blob();
     return {response, bytes:blob.size};
   }
 
