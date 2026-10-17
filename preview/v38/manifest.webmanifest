@@ -1,0 +1,25 @@
+{
+  "name": "FIELDNOTES V3.8 · 离线地理摄影预览",
+  "short_name": "FIELDNOTES",
+  "description": "无需海外实时接口的全国行政区划+精选区域预装真实街道地图",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#f7f6f2",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

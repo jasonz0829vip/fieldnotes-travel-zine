@@ -1,0 +1,16 @@
+{
+  "name": "fieldnotes-v38-map-build",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build:core": "node rebuild-map-core.cjs",
+    "build:offline": "node build_offline_tiles.cjs",
+    "test:syntax": "node --check map-core-source.mjs"
+  },
+  "devDependencies": {
+    "@mapbox/vector-tile": "2.0.5",
+    "pbf": "4.0.2",
+    "pinyin-pro": "3.27.0",
+    "esbuild": "0.25.12"
+  }
+}

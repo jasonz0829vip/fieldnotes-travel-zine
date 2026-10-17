@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "description": "BUNDLED DEMONSTRATION coverage, not nationwide offline streets",
+  "packs": [
+    {
+      "code": "469028",
+      "key": "lingshui-center",
+      "region": "海南·陵水",
+      "zoom": 13
+    },
+    {
+      "code": "310101",
+      "key": "shanghai-huangpu",
+      "region": "上海·黄浦",
+      "zoom": 13
+    },
+    {
+      "code": "610113",
+      "key": "xian-yanta",
+      "region": "陕西·西安雁塔",
+      "zoom": 13
+    }
+  ]
+}
