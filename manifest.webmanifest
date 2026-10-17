@@ -1,7 +1,7 @@
 {
-  "name": "FIELDNOTES V3.5 · 旅行摄影工作室",
+  "name": "FIELDNOTES V3.6 · 一键旅行摄影工作室",
   "short_name": "FIELDNOTES",
-  "description": "本地照片 + 真实地理地图的离线旅行摄影编辑器",
+  "description": "拍照或选择照片、选省市区县、一键出三版，本地完成照片编辑。",
   "id": "./",
   "start_url": "./index.html",
   "scope": "./",

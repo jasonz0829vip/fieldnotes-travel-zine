@@ -22,3 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Natural Earth geometry: public domain; cartographic approximations.
+
+V3.6 area names: mumuy/data_location (MIT), https://github.com/mumuy/data_location.
+City/county boundaries: zhChuXiao/ChinaGeoJson (MIT), https://github.com/zhChuXiao/ChinaGeoJson.
+Provincial boundaries: Supeset/China-GeoData (MIT), https://github.com/Supeset/China-GeoData.
+Source datasets have different dates; not all names have corresponding current boundaries.

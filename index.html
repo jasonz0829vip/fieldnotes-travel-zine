@@ -28,7 +28,7 @@ SOFTWARE.
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>FIELDNOTES V3.5 · 旅行摄影工作室</title>
+<title>FIELDNOTES V3.6 · 旅行摄影工作室</title>
 <meta name="theme-color" content="#f7f6f2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -55,7 +55,7 @@ SOFTWARE.
 .frame-option{margin:13px 0 17px;display:flex;gap:11px;padding:13px 11px;border:1px solid #d5e1d7;background:#edf4ea;border-radius:9px;color:#3d6151;align-items:flex-start;cursor:pointer}.frame-option input{accent-color:#577969;margin-top:3px}.frame-option b{font-size:11px}.frame-option small{display:block;font-size:10px;color:#73857a;line-height:1.55;margin-top:5px}.exif-panel{background:linear-gradient(145deg,#eef3ec,#f8f9f4);border:1px solid #d4e2d5;border-radius:11px;padding:12px 13px;margin-top:12px}.exif-head{display:flex;align-items:center;justify-content:space-between;color:#344f41;font-weight:750;font-size:11px;letter-spacing:.08em}.local-pill{background:#dce9de;padding:4px 8px;border-radius:9px;font-size:9px;color:#557360;font-weight:700}.exif-panel p{color:#61746a;line-height:1.65;font-size:11px;margin:11px 0 10px;overflow-wrap:anywhere}.exif-auto{font-size:11px;display:flex;align-items:center;gap:8px;color:#526a5a}.exif-auto input{accent-color:#597860}.exif-panel button{margin-top:12px;background:#fff;color:#3e5b4b;font-size:11px}.top-right .offline{font-size:10px}.style-visual{overflow:hidden}.style-presets .style-preset{min-height:111px}#mapThemeSelect,#hainanDetailSelect{font-weight:600;background:#fbfcf9}#useExifButton[hidden]{display:none}.stage{min-width:0}
 @media(max-width:760px){.layout{display:flex;flex-direction:column;height:auto!important;min-height:unset}.left,.right{max-height:none!important;overflow:visible!important}.stage{order:1;width:100%;min-height:320px}.left{order:2}.right{order:3}.workspace{min-height:240px;padding:10px}.stage-head{min-height:40px}.style-presets{grid-template-columns:repeat(2,minmax(0,1fr))}.top{padding:0 14px;height:66px}.top-right{gap:2px}.brandtext b{font-size:14px}}
 </style><style>
-/* FIELDNOTES V3.5 · Photography first; separate from maps. */
+/* FIELDNOTES V3.6 · Photography first; separate from maps. */
 .v32-panel{background:linear-gradient(155deg,#f5f4ee,#edf2ea);border:1px solid #dce4d7;border-radius:12px;padding:13px 12px;margin:3px 0 16px}
 .v32-head{display:flex;align-items:center;gap:8px;margin:3px 0 9px;font-weight:750;color:#25483a;letter-spacing:.02em;font-size:12px}
 .v32-desc{font-size:10px;line-height:1.65;color:#63756a;margin:6px 0 12px}
@@ -194,12 +194,47 @@ SOFTWARE.
 Natural Earth geometry is public domain. Data are cartographic approximations,
 not authoritative GPS positions or turn-by-turn navigation data.
 
---></head>
-<body>
+--><link rel="stylesheet" href="./v36.css">
+</head>
+<body class="v36-basic">
 <header class="top">
- <div class="brand"><div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#496454" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M10 10L16 8L14 14L8 16Z"/></svg></div><div class="brandtext"><b>FIELDNOTES</b><small>TRAVEL ZINE · STUDIO V3.5</small></div></div>
+ <div class="brand"><div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#496454" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M10 10L16 8L14 14L8 16Z"/></svg></div><div class="brandtext"><b>FIELDNOTES</b><small>TRAVEL ZINE · STUDIO V3.6</small></div></div>
  <div class="top-right"><span class="offline">V3.5 · 主体遮挡保护 · 照片本地处理</span><button class="simple-btn" id="helpBtn" type="button">使用指南 ↗</button></div>
 </header>
+<div id="v36Back"><button type="button" id="v36BackButton">← 返回一键创作</button></div>
+<section id="v36Flow" aria-label="FIELDNOTES 一键创作">
+ <div class="v36-title"><small>FIELDNOTES · V3.6</small><h1>把旅行照片，变成作品。</h1><p>拍照或上传 → 选择地点 → 一键出三版。不满意，再换一组。</p></div>
+ <div class="v36-grid">
+  <section class="v36-panel" aria-label="第一步导入照片">
+   <h2>01 · 你的旅行照片</h2>
+   <div class="v36-upload"><button id="v36Camera" class="v36-pill primary" type="button">📷 直接拍照<small>手机打开相机</small></button><button id="v36Upload" class="v36-pill" type="button">＋ 选择照片<small>相册 / Windows 文件</small></button></div>
+   <input id="v36CameraInput" type="file" accept="image/*" capture="environment" hidden>
+   <div id="v36Initial" class="v36-helper">图片只在设备本地处理，不上传云端，也不重新生成照片中的人物和建筑。</div>
+   <div id="v36Picture" class="v36-picture" hidden><canvas id="v36Original" aria-label="刚导入的旅行原始照片"></canvas><div id="v36Filename" class="v36-picture-note"></div></div>
+  </section>
+  <section class="v36-panel" aria-label="第二步选择地点">
+   <h2>02 · 拍摄地点</h2>
+   <div class="v36-fieldset"><div class="v36-searchline"><input id="v36Location" type="search" placeholder="输入省、市、区县，例如海南陵水" autocomplete="off" aria-label="拍摄地点"><button id="v36LocationClear" type="button" aria-label="清空地点">×</button></div><div id="v36Choices" hidden></div></div>
+   <div id="v36Chosen" class="v36-hint">可只选省，不强制填写市、区县或 GPS。</div>
+   <label class="v36-check"><input id="v36AutoTone" type="checkbox" checked> 智能轻修 · 不改变原片文件</label>
+   <button id="v36Generate" class="v36-generate" type="button">✦ 一键智能出图 × 3</button>
+   <p class="v36-helper">自动比较画面纹理和留白，选择更适合的版式；地图使用设备内置真实区域数据。</p>
+  </section>
+ </div>
+ <div id="v36Status" class="v36-status" role="status" aria-live="polite">正在加载离线地图库…</div>
+ <section id="v36Results" class="v36-result" hidden>
+  <div class="v36-result-header"><h2>你的三张旅行作品</h2><small>本地真实合成 · 不重绘原片</small></div>
+  <div class="v36-hero-wrap"><canvas id="v36Hero" aria-label="选中的旅行摄影作品大图"></canvas></div>
+  <p id="v36SelectedLabel" class="v36-selected"></p>
+  <div id="v36Options" class="v36-options" aria-label="可选择的三种作品"></div>
+  <div class="v36-controls"><button id="v36Regenerate" type="button">↻ 不满意，再来一组</button><button id="v36Save" class="main" type="button">↥ 保存 / 分享作品</button></div>
+  <p id="v36Feedback" class="v36-helper">不用回到设置页，可直接指定下一轮的调整方向。</p>
+  <div class="v36-chips"><button data-v36feedback="original" type="button">更保留原图</button><button data-v36feedback="editorial" type="button">更有杂志感</button><button data-v36feedback="outside" type="button">地图放外面</button><button data-v36feedback="soft" type="button">颜色更柔和</button><button data-v36feedback="map" type="button">地图更明显</button></div>
+  <p class="v36-footnote">“再来一组”是离线规则重排：换构图、地图配色和版式。它不是云端 AI 重绘，原片像素得以保留。</p>
+ </section>
+ <div class="v36-extras"><button id="v36Advanced" type="button">打开高级编辑（保护框、精确地图、透明图层等） ↗</button><p id="v36AtlasCount"></p></div>
+</section>
+
 <main class="layout">
  
 <section class="v33MobileOptions" aria-label="手机快捷操作">
@@ -1461,7 +1496,7 @@ function initV31Frame(){
  loadProject=async f=>{await oldProjectLoader(f);v31ToggleFrame(Boolean(state.frameMode));};
 }
 
-// FIELDNOTES V3.5 — deterministic, offline photo suitability and non-destructive development.
+// FIELDNOTES V3.6 — deterministic, offline photo suitability and non-destructive development.
 // No remote AI, hidden location inference, or invented roads. The analyzer scores pixels, NOT people.
 const V32_TONES={
  original:{label:'原片',exp:0,contrast:0,sat:0,warm:0},
@@ -1746,7 +1781,7 @@ function v32HookControls(){
 }
 
 
-// FIELDNOTES V3.5 · phone install, local share sheet and direct editing.
+// FIELDNOTES V3.6 · phone install, local share sheet and direct editing.
 const V33_CACHE_KEY='fieldnotes-v35-shell-20261017';
 let v33Prepared=null,v33PreparedUrl=null,v33ManualChoice=false;
 function v33IsPhone(){return matchMedia('(max-width:760px)').matches||/iPhone|iPod|Android/i.test(navigator.userAgent);}
@@ -1847,7 +1882,7 @@ initV31();
 initV31Frame();
 v32HookControls();
 
-// FIELDNOTES V3.5 — manual subject clipping, multitouch map, offline readiness checks.
+// FIELDNOTES V3.6 — manual subject clipping, multitouch map, offline readiness checks.
 // No remote calls, no embedded personal photographs and no third-party code execution.
 const v34FormerOverlay = paintOverlay;
 paintOverlay = function(ctx,w,h,guides){
@@ -2168,4 +2203,7 @@ v34Init();
 v35Init();
 
 </script>
+<script src="./data/china-index-v36.js"></script>
+<script src="./data/china-county-v36.js"></script>
+<script src="./v36-app.js"></script>
 </body></html>
