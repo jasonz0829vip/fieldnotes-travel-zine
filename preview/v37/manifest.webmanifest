@@ -1,0 +1,25 @@
+{
+  "name": "FIELDNOTES V3.7 地理视觉预览版",
+  "short_name": "FIELDNOTES",
+  "description": "真实街道水系地图，透明叠加旅行照片；内测版",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#f7f6f2",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
