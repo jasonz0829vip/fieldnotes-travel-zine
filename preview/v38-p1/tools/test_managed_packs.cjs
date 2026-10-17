@@ -10,7 +10,7 @@ const sw=read('sw.js');
 const catalog=[
   {code:'469028',name:'海南·陵水'},
   {code:'310101',name:'上海·黄浦'},
-  {code:'610113',name:'西安·雁塔'}
+  {code:'610113',name:'陕西·西安雁塔'}
 ];
 const sourceText=read('offline-tiles-v38.js').trim();
 const marker='window.FIELDNOTES_OFFLINE_TILES=';
