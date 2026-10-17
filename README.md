@@ -45,3 +45,10 @@ Photo upload and direct camera capture use full-size native file inputs instead 
 地图资料来自 [Supeset/China-GeoData](https://github.com/Supeset/China-GeoData) 与 [zhChuXiao/ChinaGeoJson](https://github.com/zhChuXiao/ChinaGeoJson)，其 MIT 许可及版权声明见 `THIRD_PARTY_LICENSES.txt`。Natural Earth 几何资料为公有领域。
 
 本仓库只包含编辑器静态文件、安装图标和离线缓存脚本，**不包含任何私人照片、GPS 拍摄记录或用户工程**。
+
+## Android 保存/分享兼容性补丁
+
+安卓端专用 android-save-v36.js：原生 PNG 下载超链接、系统分享失败时弹窗内即时反馈，以及高清图片长按保存入口。
+该代码严格限定 Android user-agent 执行，不变更 iPhone/iPad 既有导出逻辑。
+Android App 内置浏览器可能禁止文件下载或原生分享；可在 Chrome 打开 HTTPS 页面重试。
+Service Worker 缓存版本更新以保证安卓下载到新版脚本。
