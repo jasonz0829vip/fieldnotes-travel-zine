@@ -49,6 +49,8 @@ function rank(query){
   if(!(full||shortExact||containsName||containsShort||startsName||startsShort))continue;
   let score=full?540:shortExact?500:endsName?425:endsShort?370:containsName?200:containsShort?115:startsName?80:45;
   score+=Math.min(25,short.length*5);
+  // Prefer a province when its abbreviated name collides with a district or city (e.g. 海南省 vs 海南区).
+  if(r.level==='province'&&shortExact)score+=90;
   const province=byCode.get(r.code.slice(0,2)+'0000');
   const city=byCode.get(r.code.slice(0,4)+'00');
   if(province&&province!==r){const ps=stem(province.name);if(ps.length>=2&&q.includes(ps))score+=120;}
