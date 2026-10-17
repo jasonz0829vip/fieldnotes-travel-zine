@@ -1,0 +1,52 @@
+name: FIELDNOTES P1 regional offline packs
+on:
+  pull_request:
+    paths:
+      - 'preview/v38-p1/**'
+      - 'docs/P1_CN_FIRST_INSTALL.md'
+      - '.github/workflows/fieldnotes-p1-managed-maps-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check P1 JavaScript syntax
+        run: |
+          node --check preview/v38-p1/offline-pack-manager-v38.js
+          node --check preview/v38-p1/sw.js
+          for file in preview/v38-p1/packs/*.js; do node --check "$file"; done
+      - name: Regenerate map packs and compare tracked results
+        run: |
+          node preview/v38-p1/tools/split_offline_packs.cjs
+          git diff --exit-code -- preview/v38-p1/packs/
+      - name: Run offline cache management tests
+        run: node preview/v38-p1/tools/test_managed_packs.cjs
+      - name: Build isolated domestic static bundle
+        run: python3 preview/v38-p1/tools/build_domestic_static.py
+      - name: Assert deploy ZIP preserves opt-in maps and excludes obsolete monolith
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          z=Path("preview/v38-p1/downloads/FIELDNOTES_V3.8_P1_Managed_Maps_Static_Deploy.zip")
+          with ZipFile(z) as pkg:
+              names=set(pkg.namelist())
+              required={"index.html","sw.js","offline-pack-manager-v38.js",
+                  "packs/469028.js","packs/310101.js","packs/610113.js"}
+              assert required<=names
+              assert "offline-tiles-v38.js" not in names
+              assert pkg.testzip() is None
+          print("PASS: deploy ZIP has independently removable packs")
+          PY
+      - name: Publish verification ZIP as a short-lived CI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-p1-managed-maps-static
+          path: preview/v38-p1/downloads/FIELDNOTES_V3.8_P1_Managed_Maps_Static_Deploy.zip
+          retention-days: 7
