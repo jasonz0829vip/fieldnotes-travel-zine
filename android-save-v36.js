@@ -81,7 +81,12 @@
     const agent = navigator.userAgent;
     const embedded = /\bwv\b|MicroMessenger|WeChat|QQ\/|Aweme|Douyin|ChatGPT/i.test(agent);
     const direct = typeof navigator.share === 'function';
-    share.textContent = '系统分享 / 保存到相册';
+    const isWechat = /MicroMessenger/i.test(agent);
+    share.textContent = isWechat ? '微信内长按保存' : '系统分享 / 保存到相册';
+    if (isWechat) {
+      message('安卓微信：点击「微信内长按保存」进入高清图片，然后长按作品选择「保存图片」。图片不会上传服务器。');
+      return;
+    }
     message(embedded
       ? '当前可能处于 App 内置浏览器。可尝试系统分享；如果没有反应，建议在 Chrome 中打开本页面并点击「下载 PNG 文件」。'
       : direct
@@ -91,6 +96,8 @@
 
   // Old share listener is on the bubble phase. Stop only Android events, keeping iOS untouched.
   share.addEventListener('click', event => {
+    // Android WeChat has its own real JPEG image long-press route.
+    if (/MicroMessenger/i.test(navigator.userAgent)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     const r = prepared();

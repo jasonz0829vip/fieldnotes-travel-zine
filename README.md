@@ -52,3 +52,6 @@ Photo upload and direct camera capture use full-size native file inputs instead 
 该代码严格限定 Android user-agent 执行，不变更 iPhone/iPad 既有导出逻辑。
 Android App 内置浏览器可能禁止文件下载或原生分享；可在 Chrome 打开 HTTPS 页面重试。
 Service Worker 缓存版本更新以保证安卓下载到新版脚本。
+
+## Android WeChat long-press image flow
+Android WeChat uses a standalone JPEG image display generated locally from the final PNG, for the WeChat long-press Save Image UI. Only Android+MicroMessenger executes it; Apple and Android Chrome paths are unchanged. Saving to an actual Android phone album depends on Tencent WeChat X5 and must be verified on physical hardware. High-res PNG fallback is retained; no photos are sent to servers.
