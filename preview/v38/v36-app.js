@@ -108,7 +108,12 @@ function waitPhoto(file){
   if(elapsed++<120)setTimeout(tick,120);else status('照片读取未完成，请重试或检查照片格式。',true);
  };setTimeout(tick,150);
 }
+let v36PresentedImage=null;
 function photoLoaded(){
+ // File input polling and photo metadata MutationObserver may both signal the same upload.
+ // Prevent a late duplicate callback from resetting a finished composition.
+ if(!state.image||state.image===v36PresentedImage)return;
+ v36PresentedImage=state.image;
  $36('v36Picture').hidden=false;$36('v36Initial').hidden=true;
  const c=$36('v36Original'),w=680,h=Math.round(w*state.photoH/state.photoW);c.width=w;c.height=h;c.getContext('2d').drawImage(state.image,0,0,w,h);
  $36('v36Filename').textContent=state.photoName+' · '+state.photoW+' × '+state.photoH;

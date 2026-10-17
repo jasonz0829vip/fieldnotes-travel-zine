@@ -36,3 +36,9 @@ OpenMapTiles vector tile schema: https://openmaptiles.org/
 JavaScript vector decoding bundled from @mapbox/vector-tile (BSD-3-Clause) and pbf (BSD-3-Clause).
 pinyin-pro transliteration library: MIT; esbuild development bundler: MIT.
 All third-party attributions must be retained when redistributing the offline package.
+
+--- FIELDNOTES V3.8 additional runtime attributions ---
+Map geometry and street/waterway data: © OpenStreetMap contributors, licensed under ODbL 1.0. See https://www.openstreetmap.org/copyright
+Cartographic tiles: OpenFreeMap / OpenMapTiles. Refer to their original attribution and redistribution policies.
+Bundled @mapbox/vector-tile (BSD-3-Clause), pbf (BSD-3-Clause), pinyin-pro (MIT) code. Full notices: licenses/ directory.
+These street tiles cover only the specifically shipped regions, not nationwide street-level map data.

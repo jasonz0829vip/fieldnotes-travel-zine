@@ -10,7 +10,7 @@ root=Path(__file__).resolve().parent.parent
 files=("index.html","v36.css","v36-app.js","v37-editorial.js","v38-map-core.js",
        "offline-tiles-v38.js","android-save-v36.js","wechat-android-save-v36.js",
        "manifest.webmanifest","sw.js","THIRD_PARTY_LICENSES.txt","OFFLINE_README.txt")
-folders=("data","icons")
+folders=("data","icons","licenses")
 output=root/"downloads"/"FIELDNOTES_V3.8_Windows_Offline.zip"
 output.parent.mkdir(parents=True,exist_ok=True)
 sources=[root/name for name in files]

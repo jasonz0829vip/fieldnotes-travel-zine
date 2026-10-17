@@ -7,3 +7,8 @@ For Windows: keep the whole folder, open index.html directly. For iOS/Android PW
 For China main networks: GitHub Pages accessibility has NOT been verified; domestic static delivery or native mobile package is the next distribution milestone.
 OSM attribution is required and already included in composite: OpenFreeMap © OpenMapTiles Data from OpenStreetMap.
 All photos are rendered locally; build script never reads or uploads private photos.
+
+IMPORTANT ISOLATION & NETWORK:
+V3.8 offline mode never fetches missing OpenFreeMap streets from the internet; only the preinstalled tile pack is used.
+V3.8 cache name is isolated from older V3.6/V3.7 PWA caches on the same domain, so installing this preview should not purge the stable app cache.
+Bundled third-party code license texts are included in licenses/.
