@@ -262,11 +262,19 @@
     document.head.append(style);
     const holder = document.createElement('div');
     holder.className = 'v33InstallAction';
+    // The normal phone flow hides the legacy .layout. Put its entry in the visible simple UI.
+    const basic = document.querySelector('#v36Flow .v36-extras');
     openButton = document.createElement('button');
     openButton.id = 'fn38StorageBtn';
     openButton.type = 'button';
     openButton.textContent = '🗺 离线地图 / 存储管理';
-    holder.append(openButton);
+    if (basic) basic.insertBefore(openButton, basic.querySelector('#v36AtlasCount'));
+    else holder.append(openButton);
+    const advancedButton = document.createElement('button');
+    advancedButton.id = 'fn38StorageBtnAdvanced';
+    advancedButton.type = 'button';
+    advancedButton.textContent = '🗺 离线地图 / 存储管理';
+    holder.append(advancedButton);
     existing.parentElement.insertAdjacentElement('afterend', holder);
     dialog = document.createElement('dialog');
     dialog.id = 'fn38StorageDialog';
@@ -286,7 +294,7 @@
     allClear.className = 'fn38Danger';
     if (fileMode || !supported) {mapClear.disabled = true;allClear.disabled = true;}
     controls.append(mapClear,allClear,makeButton('关闭',async () => dialog.close()));
-    openButton.addEventListener('click', async () => {
+    for (const entry of [openButton, advancedButton]) entry.addEventListener('click', async () => {
       if (typeof dialog.showModal === 'function') dialog.showModal();
       else dialog.setAttribute('open','');
       await ready; await render();
