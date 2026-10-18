@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "sources": [],
+  "note": "No nationwide source is deployed yet. Add only verified OpenMapTiles-compatible PMTiles archives with lawful ODbL attribution and reliable domestic HTTPS/CORS/Range access. Never advertise national coverage from this empty catalog.",
+  "requiredSchema": "openmaptiles",
+  "expectedType": "pmtiles",
+  "security": "No arbitrary external map hosts are enabled; cross-origin sources need explicit approval.",
+  "exampleDocumentation": "docs/FIELDNOTES_NATIONAL_MAP_PROVIDER.md"
+}
