@@ -14,7 +14,9 @@
  const validId=/^[a-zA-Z0-9_-]{1,32}$/;
  const sourceId=validId.test(String(config.version||''))?config.version:'not-configured';
  const configured=Boolean(config.enabled&&config.kind==='pmtiles'&&validId.test(String(config.version||'')) &&
-   /^https:\/\//.test(config.url||'') && !/[@#]/.test(config.url||'') &&
+   (/^https:\/\//.test(config.url||'') ||
+    /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?\//.test(config.url||'')) &&
+   !/[@#]/.test(config.url||'') &&
    typeof window.pmtiles?.PMTiles==='function');
  const supported=typeof caches!=='undefined'&&location.protocol!=='file:';
  const regions=new Map(),tileOwners=new Map();
