@@ -149,7 +149,7 @@ async function verifyLifeCycle(){
   await storage.open('other-app-cache-20261018');
   await storage.open('fn38p1-offline-shell-20261018-2');
   await storage.open('fn38p1-pack-310101-20261018-1');
-  await storage.open('fn39-offline-shell-20261018-2');
+  await storage.open('fn39-offline-shell-20261018-3');
   await first.api.clearApplication();
   assert.deepEqual(await storage.keys(),[
     'other-app-cache-20261018','fn38p1-offline-shell-20261018-2','fn38p1-pack-310101-20261018-1'
