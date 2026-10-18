@@ -1782,7 +1782,7 @@ function v32HookControls(){
 
 
 // FIELDNOTES V3.6 · phone install, local share sheet and direct editing.
-const V33_CACHE_KEY='fn38p1-offline-shell-20261018-1';
+const V33_CACHE_KEY='fn38p1-offline-shell-20261018-2';
 let v33Prepared=null,v33PreparedUrl=null,v33ManualChoice=false;
 function v33IsPhone(){return matchMedia('(max-width:760px)').matches||/iPhone|iPod|Android/i.test(navigator.userAgent);}
 function v33ScrollTo(selector){const el=document.querySelector(selector);if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}
@@ -2205,10 +2205,10 @@ v35Init();
 </script>
 <script src="./data/china-index-v36.js"></script>
 <script src="./data/china-county-v36.js"></script>
-<script src="./offline-tiles-v38.js"></script>
-<script>window.FIELDNOTES_OFFLINE_FIRST=true;window.FIELDNOTES_ALLOW_EXTERNAL_MAPS=false;</script>
+<script>window.FIELDNOTES_OFFLINE_TILES={version:'v38-map-pack-1',tiles:{},regions:[]};window.FIELDNOTES_OFFLINE_FIRST=true;window.FIELDNOTES_ALLOW_EXTERNAL_MAPS=false;</script>
 <script src="./v36-app.js"></script>
 <script src="./v38-map-core.js"></script>
+<script src="./offline-pack-manager-v38.js"></script>
 <script src="./v37-editorial.js"></script>
 <script src="./p1-art-direction.js"></script>
 <script src="./p1-ux.js"></script>

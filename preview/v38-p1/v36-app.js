@@ -200,8 +200,10 @@ function init(){
  $36('v36BackButton').addEventListener('click',()=>{document.body.classList.remove('v36-advanced');document.body.classList.add('v36-basic');$36('v36Flow').scrollIntoView({block:'start'});});
  $36('v36AtlasCount').textContent='离线内置 '+src.stats.province+' 省级、'+src.stats.city+' 市级、'+src.stats.county+' 区县级地名；真实轮廓 '+src.stats.province+' 省级、'+src.stats.geoCity+' 市级、'+src.stats.geoCounty+' 区县级。';
  const packs=window.FIELDNOTES_OFFLINE_TILES?.regions||[];
- if(packs.length) $36('v36AtlasCount').textContent+=' · 已预装街道区域：'+packs.map(x=>x.region+'中心附近').join('、')+'；其他城市在断网时仅显示真实行政轮廓。';
- status('可断网制图。已预装部分地区的精细街道；其他地区仍可使用全国行政区划基础地图。');
+ $36('v36AtlasCount').textContent+=packs.length
+   ? ' · 已下载精细街道：'+packs.map(x=>x.region+'中心局部').join('、')
+   : ' · 精细街道可按需下载；其他地区仍使用真实行政区轮廓。';
+ status('基础地图支持离线制图；精细街道地图请通过「离线地图 / 存储管理」按需下载。');
 }
 init();
 window.FIELDNOTES_V36_TEST={rank,applyRecord,asFeature,geometryFallback,generate,regenerate,getSelected:()=>selected,getVariants:()=>variants,coverage:src.stats,recordsCount:records.length};
