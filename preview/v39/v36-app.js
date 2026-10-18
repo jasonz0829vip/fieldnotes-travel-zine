@@ -94,6 +94,23 @@ async function checkLocalMap(record=null,levelOverride=null){
   await manager.ready;
   if(ticket!==mapPromptSerial)return;
   const level=levelOverride||record?.level||'city';
+  const national=window.FIELDNOTES_NATIONAL_MAP;
+  const large=await national?.availability?.(Number(lon),Number(lat));
+  if(ticket!==mapPromptSerial)return;
+  if(large?.status==='installed'){
+   mapPrompt('✓ 当前地点 Z14 真实道路、水系、建筑地图已离线保存（局部约九张瓦片）。'+
+     (state.exact?'按照片位置选取。':'按行政区中心估算位置，并非照片实际GPS。'),'installed');return;
+  }
+  if(large?.status==='downloadable'){
+   offeredMap={national:true,lon:Number(lon),lat:Number(lat),
+    name:record?.name||'照片位置',zoom:large.zoom};
+   mapPrompt('找到当前位置周边可按需读取的 Z14 矢量地图，包含当地实际存在的道路、水系与建筑图层。'+
+    '下载最多九张瓦片，限额 12 MB；只下载选中地点，不安装全国地图。'+
+    (state.exact?'':'当前以行政区中心作为地图位置。')+
+    '下载将向地图提供方发送所选瓦片范围，原始照片不会上传。','offer',true);
+   $36('v39MapDownload').textContent='下载该地点精细地图';
+   return;
+  }
   const match=manager.matchLocation(Number(lon),Number(lat),level);
   if(!match){
    const geo=record?.code?geometryFallback(record.code):null;
@@ -125,9 +142,13 @@ async function downloadSuggestedMap(){
  if(!match||!manager)return;
  const button=$36('v39MapDownload');
  button.disabled=true;
- mapPrompt('正在下载 '+match.spec.name+' 精细街道（只保存在本机，不上传照片）…','offer');
+ mapPrompt('正在按需读取真实矢量地图，仅保存对应地点的数据…','offer');
  try{
-  await manager.install(match.spec);
+  if(match.national){
+   await window.FIELDNOTES_NATIONAL_MAP.install(match.lon,match.lat,match.name);
+  }else{
+   await manager.install(match.spec);
+  }
   await checkLocalMap(chosen,state.gpsFromPhoto?'gps':null);
  }catch(e){
   offeredMap=match;
