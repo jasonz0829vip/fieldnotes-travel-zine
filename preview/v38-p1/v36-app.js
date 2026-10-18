@@ -242,20 +242,41 @@ async function generate(){
  try{
   if(window.FIELDNOTES_V37_PREPARE)await window.FIELDNOTES_V37_PREPARE();
   if($36('v36AutoTone').checked){if(state.v32Analysis)v32AutoTone();}else v32SetTone('original');
-  variants.splice(0,variants.length,...planConfigs());const out=$36('v36Options');out.replaceChildren();
-  variants.forEach((o,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='v36-option';
-   const canvas=document.createElement('canvas'),label=document.createElement('b'),caption=document.createElement('small');label.textContent=o.label;caption.textContent=o.desc;
-   btn.append(canvas,label,caption);out.append(btn);drawVariant(canvas,o.cfg,480);btn.addEventListener('click',()=>selectVariant(i));});
-  $36('v36Results').hidden=false;selectVariant(0);
+  const group=((drawRound%2)+2)%2;
+  const signature=JSON.stringify([
+   state.photoName,state.photoW,state.photoH,state.centerLon,state.centerLat,
+   state.v36RegionCode,state.exact,$36('v36AutoTone').checked,
+   window.FIELDNOTES_V37_DEBUG?.renderedVersion?.()||0
+  ]);
+  if(cachedSignature!==signature){batchCache.clear();cachedSignature=signature;}
+  let cached=batchCache.get(group);
+  if(!cached){
+   const planned=planConfigs();
+   if(planned.length!==6)throw Error('当前版式未能生成完整六款，拒绝用重复配色凑数');
+   const items=[];
+   const previewWidth=innerWidth<=720?320:440;
+   planned.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.type='button';btn.className='v36-option';
+    const canvas=document.createElement('canvas'),label=document.createElement('b'),caption=document.createElement('small');
+    label.textContent=o.label;caption.textContent=o.desc;
+    btn.append(canvas,label,caption);drawVariant(canvas,o.cfg,previewWidth);
+    btn.addEventListener('click',()=>selectVariant(i));items.push(btn);
+   });
+   cached={planned,items,selected:0};batchCache.set(group,cached);
+  }
+  variants.splice(0,variants.length,...cached.planned);
+  $36('v36Options').replaceChildren(...cached.items);
+  $36('v36Results').hidden=false;selectVariant(cached.selected);
+  $36('v36Regenerate').textContent=group===0?'↻ 下一组 6 款（07—12）':'↻ 返回第一组（01—06）';
+  $36('v36Feedback').textContent='第 '+(group+1)+' 组 · '+(group===0?'01—06':'07—12')+'；下一次切换到另一组，之前的六张预览直接复用。';
   const mapInfo=window.FIELDNOTES_V37_DEBUG?.info;
-  const details=mapInfo?.status==='loaded'?('已加载真实道路水系地图：'+mapInfo.detail):('精细街道地图未加载；当前展示真实行政轮廓，并非街道级地图。');
-  status('第 '+(drawRound+1)+' 组 · 3 种设计。'+details+' · 地理红点为区域级近似位置，除非照片包含 GPS。');
+  const details=mapInfo?.status==='loaded'?('精细真实道路/水系已加载：'+mapInfo.detail):('当前展示真实行政轮廓，不冒充精细街道。');
+  status('第 '+(group+1)+' 组 · 六款不同版式。'+details+' 未提供真实 GPS 时，地理坐标代表区域中心。');
   $36('v36Results').scrollIntoView({block:'start',behavior:'smooth'});
  }catch(e){status('合成失败：'+e.message,true);console.error(e);}finally{generating=false;$36('v36Generate').disabled=false;$36('v36Generate').textContent=oldGenerateLabel;}
 }
-function regenerate(reason){
- feedback=reason;drawRound++;const messages={balanced:'替换构图与地图配色',original:'更多保留原片',editorial:'增强杂志感',outside:'地图放照片外',soft:'更柔和的配色',map:'地图更明显'};
- $36('v36Feedback').textContent='当前方向：'+(messages[reason]||messages.balanced);
+function regenerate(){
+ feedback='balanced';drawRound=(drawRound+1)%2;
  generate();
 }
 function init(){
@@ -268,11 +289,26 @@ function init(){
  new MutationObserver(()=>{if(state.image&&state.image!==lastShownImage){lastShownImage=state.image;photoLoaded();}})
   .observe($36('photoMeta'),{childList:true,subtree:true,characterData:true});
  const loc=$36('v36Location');
- loc.addEventListener('input',()=>{chosen=null;showSuggestions(loc.value);$36('v36Chosen').textContent='可只输入省、市或区县；从建议中选择可避免重名误匹配。';});
+ loc.addEventListener('input',()=>{
+  chosen=null;resetMapPrompt();invalidatePreviews();showSuggestions(loc.value);
+  $36('v36Chosen').textContent='请从建议中选择地点，避免重名误匹配。暂不识别街道门牌号。';
+ });
  loc.addEventListener('focus',()=>showSuggestions(loc.value));
- $36('v36LocationClear').addEventListener('click',()=>{loc.value='';chosen=null;state.v36RegionCode=null;showSuggestions('');loc.focus();});
+ $36('v36LocationClear').addEventListener('click',()=>{
+  loc.value='';chosen=null;state.v36RegionCode=null;resetMapPrompt();invalidatePreviews();showSuggestions('');loc.focus();
+ });
+ $36('v39MapDownload').addEventListener('click',downloadSuggestedMap);
+ $36('v39MapSkip').addEventListener('click',()=>{
+  offeredMap=null;mapPrompt('已选择基础地图。无需下载，直接点击第三步一键出图。','base');
+ });
+ window.addEventListener('fieldnotes:maps-changed',()=>{
+  invalidatePreviews();
+  if(chosen||state.gpsFromPhoto)checkLocalMap(chosen,state.gpsFromPhoto?'gps':null);
+  status('精细地图已更新，请点击第三步重新生成当前地点作品。');
+ });
+ $36('v36AutoTone').addEventListener('change',invalidatePreviews);
  $36('v36Generate').addEventListener('click',()=>{drawRound=0;feedback='balanced';generate();});
- $36('v36Regenerate').addEventListener('click',()=>regenerate('balanced'));
+ $36('v36Regenerate').addEventListener('click',regenerate);
  for(const b of document.querySelectorAll('[data-v36feedback]'))b.addEventListener('click',()=>regenerate(b.dataset.v36feedback));
  $36('v36Save').addEventListener('click',()=>{if(!variants[selected])return status('请先一键生成作品。',true);$36('v33DockExport').click();});
  $36('v36Advanced').addEventListener('click',()=>{document.body.classList.remove('v36-basic');document.body.classList.add('v36-advanced');resizePreview();schedule();document.querySelector('.layout')?.scrollIntoView({block:'start'});});
@@ -282,10 +318,10 @@ function init(){
  $36('v36AtlasCount').textContent+=packs.length
    ? ' · 已下载精细街道：'+packs.map(x=>x.region+'中心局部').join('、')
    : ' · 精细街道可按需下载；其他地区仍使用真实行政区轮廓。';
- status('基础地图支持离线制图；精细街道地图请通过「离线地图 / 存储管理」按需下载。');
+ status('照片只在本机处理。选好地点后会自动检查精细地图，无须了解缓存或数据包。');
 }
 init();
-window.FIELDNOTES_V36_TEST={rank,applyRecord,asFeature,geometryFallback,generate,regenerate,getSelected:()=>selected,getVariants:()=>variants,coverage:src.stats,recordsCount:records.length};
+window.FIELDNOTES_V36_TEST={rank,applyRecord,asFeature,geometryFallback,generate,regenerate,getSelected:()=>selected,getVariants:()=>variants,coverage:src.stats,recordsCount:records.length,getCachedGroups:()=>batchCache.size,checkLocalMap};
 })();
 
 // BRIDGE_SYNC_V36
