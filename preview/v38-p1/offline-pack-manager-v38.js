@@ -287,12 +287,12 @@
     const holder = document.createElement('div');
     holder.className = 'v33InstallAction';
     // The normal phone flow hides the legacy .layout. Put its entry in the visible simple UI.
-    const basic = document.querySelector('#v36Flow .v36-extras');
+    const basic = document.querySelector('#v39Settings .v39-settings-panel') || document.querySelector('#v36Flow .v36-extras');
     openButton = document.createElement('button');
     openButton.id = 'fn38StorageBtn';
     openButton.type = 'button';
     openButton.textContent = '🗺 离线地图 / 存储管理';
-    if (basic) basic.insertBefore(openButton, basic.querySelector('#v36AtlasCount'));
+    if (basic) basic.append(openButton);
     else holder.append(openButton);
     const advancedButton = document.createElement('button');
     advancedButton.id = 'fn38StorageBtnAdvanced';
