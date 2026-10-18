@@ -324,6 +324,142 @@
   }
   renderCalls++;
  }
+
+ // V3.9.1: six distinct editorial *compositions* using the existing V3.7
+ // style definitions and our existing OSM drawing primitives. These never
+ // crop or invent the original photo, and never require online generation.
+ const editorialIds=new Set([
+  'heritage-atlas','frost-geography','graphic-location',
+  'green-topology','city-trace','postcard-expedition'
+ ]);
+ function coverPhotoInside(ctx,area){
+  const pw=state.photoW||1,ph=state.photoH||1;
+  const factor=Math.min(area.w/pw,area.h/ph);
+  const W=pw*factor,H=ph*factor;
+  const x=area.x+(area.w-W)/2,y=area.y+(area.h-H)/2;
+  v32DrawPhoto(ctx,x,y,W,H);
+  return{x,y,w:W,h:H};
+ }
+ function mapWindow(ctx,w,h,box,loc,style,{alpha=.82,span=12500,majorOnly=false,waterAlpha=.15}={}){
+  const l=layer(w,h);if(!l)return'none';
+  const g=l.ctx;
+  g.save();g.beginPath();g.rect(box.x,box.y,box.w,box.h);g.clip();
+  const kind=drawGeometry(g,box,loc,style,{alpha,span,majorOnly,waterAlpha,roadFactor:.86,parks:true,budget:1450});
+  g.restore();ctx.drawImage(l.canvas,0,0,w,h);
+  return kind;
+ }
+ function rule(ctx,x1,y1,x2,y2,color,linewidth=1){
+  ctx.save();ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.lineWidth=Math.max(.6,linewidth);ctx.strokeStyle=color;ctx.stroke();ctx.restore();
+ }
+ function strongTitle(ctx,s,x,y,maxWidth,w,color,serif=true){
+  text(ctx,s,x,y,adjustedFont(w,.073,19,88),color,{serif,weight:serif?500:700,max:maxWidth});
+ }
+ function creditMap(ctx,w,h,mode,color){
+  if(mode!=='detailed')return;
+  text(ctx,'MAP © OpenStreetMap',w*.976,h*.979,adjustedFont(w,.009,8,13),color,{mono:true,align:'right'});
+ }
+ function renderEditorial(ctx,w,h,id,options={}){
+  const loc={lon:Number(state.centerLon),lat:Number(state.centerLat)};
+  if(!Number.isFinite(loc.lon)||!Number.isFinite(loc.lat))return oldPaint(ctx,w,h,options);
+  const portrait=h>w*1.18,name=normName(),coords=precision(),approx=status();
+  const pad=w*.048,span=state.exact?5500:12200;
+  let result='none';
+  ctx.clearRect(0,0,w,h);
+  if(id==='heritage-atlas'){
+   // 07 / A full-photo archival print. Cream margin and title belong to the print, not photo pixels.
+   ctx.fillStyle='#f0e6d5';ctx.fillRect(0,0,w,h);
+   const top=portrait?h*.11:h*.19,bottom=portrait?h*.13:h*.17;
+   const photo=coverPhotoInside(ctx,{x:pad,y:top,w:w-2*pad,h:h-top-bottom});
+   strongTitle(ctx,name,pad,h*(portrait?.074:.138),w*.72,w,'#554539');
+   text(ctx,'ARCHIVE  /  07',w*.95,top*.30,adjustedFont(w,.013,9,18),'#786353',{mono:true,align:'right'});
+   rule(ctx,pad,top*.83,w-pad,top*.83,'#b8a68a',w*.001);
+   const map={x:w*.765,y:h-bottom*.81,w:w*.15,h:bottom*.62};
+   result=mapWindow(ctx,w,h,map,loc,palette.journal,{alpha:.90,span});
+   text(ctx,'TRAVEL  /  HERITAGE',pad,h-bottom*.54,adjustedFont(w,.015,10,21),'#6a5240',{mono:true});
+   text(ctx,coords,pad,h-bottom*.18,adjustedFont(w,.012,9,16),'#5f675c',{mono:true,max:w*.66});
+   rule(ctx,photo.x,photo.y,photo.x+photo.w,photo.y,'#fffdf9',w*.002);
+  }else if(id==='frost-geography'){
+   // 08 / Airy topographic window over the *sky only* and an opaque typographic ice header.
+   commonPhoto(ctx,w,h);
+   const band=portrait?h*.22:h*.36;
+   ctx.fillStyle='rgba(231,244,247,.85)';ctx.fillRect(0,0,w,band);
+   ctx.fillStyle='rgba(245,252,252,.28)';ctx.fillRect(0,band,w,h*.02);
+   rule(ctx,pad,band*.92,w-pad,band*.92,'#6d93a2',w*.0015);
+   strongTitle(ctx,name,pad,band*.39,w*.50,w,'#224355',false);
+   text(ctx,'08 / FROST GEOGRAPHY',pad,band*.60,adjustedFont(w,.016,9,20),'#476d81',{mono:true});
+   text(ctx,coords,pad,band*.78,adjustedFont(w,.012,9,17),'#466879',{mono:true,max:w*.52});
+   const box={x:w*.58,y:band*.10,w:w*.36,h:band*.69};
+   result=mapWindow(ctx,w,h,box,loc,palette.coastal,{alpha:.96,span});
+   north(ctx,w*.946,band*.23,w,'#467b9c');
+  }else if(id==='graphic-location'){
+   // 09 / True photographic split: photo is contained without cropping, with separate slate index.
+   ctx.fillStyle='#1d4050';ctx.fillRect(0,0,w,h);
+   const area=portrait?{x:pad,y:pad,w:w-2*pad,h:h*.70}:
+    {x:pad,y:pad,w:w*.695,h:h-2*pad};
+   coverPhotoInside(ctx,area);
+   const panel=portrait?{x:pad,y:h*.75,w:w-2*pad,h:h*.21}:
+    {x:w*.76,y:pad,w:w*.20,h:h-2*pad};
+   ctx.fillStyle='#14303d';ctx.fillRect(panel.x,panel.y,panel.w,panel.h);
+   text(ctx,'09',panel.x+panel.w*.06,panel.y+panel.h*.30,
+    adjustedFont(w,.080,20,98),'#e3f1ef',{serif:true});
+   const labelY=panel.y+panel.h*.56;
+   text(ctx,name,panel.x+panel.w*.06,labelY,adjustedFont(w,.034,12,42),'#f3f1dd',{serif:true,max:panel.w*.91});
+   const box=portrait?{x:panel.x+panel.w*.66,y:panel.y+panel.h*.06,w:panel.w*.28,h:panel.h*.46}:
+    {x:panel.x+panel.w*.08,y:panel.y+panel.h*.63,w:panel.w*.85,h:panel.h*.28};
+   result=mapWindow(ctx,w,h,box,loc,palette.blueprint,{alpha:.90,span,majorOnly:true});
+   text(ctx,'AREA  /  '+(state.exact?'GPS':'APPROX.'),panel.x+panel.w*.06,panel.y+panel.h*.82,
+    adjustedFont(w,.010,9,15),'#a6bec3',{mono:true,max:panel.w*.84});
+  }else if(id==='green-topology'){
+   // 10 / Field notebook: border grid and vertical ink strip, photo remains full bleed.
+   commonPhoto(ctx,w,h);
+   const rail=w*.16;
+   ctx.fillStyle='rgba(15,55,36,.83)';ctx.fillRect(0,0,rail,h);
+   for(let i=0;i<10;i++)rule(ctx,rail*.15,h*(.06+i*.09),rail*.86,h*(.06+i*.09),'#c0dcc2',w*.0011);
+   ctx.save();ctx.translate(rail*.54,h*.71);ctx.rotate(-Math.PI/2);
+   text(ctx,'FIELD   SURVEY   /   10',0,0,adjustedFont(w,.017,11,24),'#f4f6e7',{mono:true});
+   ctx.restore();
+   const box={x:w*.64,y:h*.055,w:w*.30,h:h*.27};
+   ctx.fillStyle='rgba(24,83,59,.36)';ctx.fillRect(box.x-w*.02,box.y-h*.02,box.w+w*.04,box.h+h*.04);
+   result=mapWindow(ctx,w,h,box,loc,palette.sky,{alpha:.83,span,waterAlpha:.23});
+   ctx.fillStyle='rgba(18,51,42,.61)';ctx.fillRect(w*.18,h*.84,w*.79,h*.12);
+   text(ctx,name,w*.22,h*.90,adjustedFont(w,.043,16,56),'#f8f7e5',{serif:true,max:w*.63});
+   text(ctx,'LANDSCAPE / '+(state.exact?'GPS':'REGIONAL'),w*.22,h*.938,adjustedFont(w,.011,8,17),'#cfdfd1',{mono:true});
+  }else if(id==='city-trace'){
+   // 11 / Structured dark top data-panel, no central-body street overlay.
+   commonPhoto(ctx,w,h);
+   const band=portrait?h*.255:h*.355;
+   ctx.fillStyle='rgba(14,43,64,.90)';ctx.fillRect(0,0,w,band);
+   const box={x:w*.51,y:band*.06,w:w*.45,h:band*.81};
+   result=mapWindow(ctx,w,h,box,loc,palette.blueprint,{alpha:.81,span,majorOnly:true});
+   for(let x=0;x<=8;x++)rule(ctx,w*x/8,0,w*x/8,band,'rgba(211,229,234,.17)',w*.0007);
+   strongTitle(ctx,name,pad,band*.38,w*.50,w,'#eef4f3',false);
+   text(ctx,'CITY TRACE  /  11',pad,band*.60,adjustedFont(w,.016,9,22),'#c0d7db',{mono:true,max:w*.53});
+   text(ctx,coords,pad,band*.79,adjustedFont(w,.012,9,16),'#d3e4e2',{mono:true,max:w*.50});
+   ctx.fillStyle='rgba(6,25,40,.66)';ctx.fillRect(w*.03,h*.91,w*.94,h*.055);
+   text(ctx,'REAL CARTOGRAPHY   ·   PHOTOGRAPHY',w*.055,h*.948,
+    adjustedFont(w,.011,8,15),'#fbfbf4',{mono:true,max:w*.88});
+  }else if(id==='postcard-expedition'){
+   // 12 / Light archival postcard with its own white print border.
+   ctx.fillStyle='#faf7ef';ctx.fillRect(0,0,w,h);
+   const top=portrait?h*.06:h*.06,bottom=portrait?h*.195:h*.225;
+   const photo=coverPhotoInside(ctx,{x:w*.065,y:top,w:w*.87,h:h-top-bottom});
+   rule(ctx,w*.07,h-bottom*.94,w*.93,h-bottom*.94,'#c7c2b5',w*.0014);
+   const titleY=h-bottom*.56;
+   strongTitle(ctx,name,w*.075,titleY,w*.53,w,'#304b40');
+   text(ctx,'POSTCARD / EXPEDITION',w*.077,titleY+adjustedFont(w,.042,12,30),
+    adjustedFont(w,.013,9,17),'#627a68',{mono:true,max:w*.58});
+   text(ctx,coords,w*.077,h-bottom*.12,adjustedFont(w,.011,8,16),'#71827a',{mono:true,max:w*.58});
+   const rr={x:w*.72,y:h-bottom*.77,w:w*.21,h:bottom*.66};
+   ctx.save();ctx.strokeStyle='#8eaa9d';ctx.lineWidth=Math.max(1,w*.002);
+   ctx.beginPath();ctx.ellipse(rr.x+rr.w*.5,rr.y+rr.h*.5,rr.w*.48,rr.h*.48,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+   result=mapWindow(ctx,w,h,rr,loc,palette.minimal,{alpha:.94,span});
+   rule(ctx,photo.x,photo.y,photo.x+photo.w,photo.y,'#fefdfb',w*.002);
+  }else return oldPaint(ctx,w,h,options);
+  creditMap(ctx,w,h,result,id==='graphic-location'||id==='city-trace'?'#e7f3f3':'#47645c');
+  renderCalls++;
+ }
+
  const styles=[
   ['sky','Sky Atlas','天空与街网自然融合'],
   ['coastal','Coast & Water','水系地图与柔和地理层'],
@@ -357,6 +493,9 @@
   }));
  };
  paint=function(ctx,w,h,options={}){
+  if(options.layerOnly)return oldPaint(ctx,w,h,options);
+  if(editorialIds.has(state.v37Preset)&&!visibleIds.has(state.p1Kind))
+   return renderEditorial(ctx,w,h,state.v37Preset,options);
   if(!visibleIds.has(state.p1Kind))return oldPaint(ctx,w,h,options);
   const name=state.p1Kind;render(ctx,w,h,name,options);
  };
