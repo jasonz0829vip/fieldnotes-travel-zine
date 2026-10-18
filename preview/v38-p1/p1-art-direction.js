@@ -332,16 +332,24 @@
   ['blueprint','Urban Blueprint','镜头内侧的城市蓝图'],
   ['journal','Field Journal','杂志字号与细线地理档案']
  ];
- window.FIELDNOTES_V37_PLAN=function({round=0,feedback='balanced'}={}){
+ // Reuse V3.7's *existing* styles 07-12 instead of drawing six new templates.
+ // Batch one is the six hand-curated P1 treatments; batch two uses six historic, independent layouts.
+ const earlierPlans=window.FIELDNOTES_V37_DEBUG?.plans;
+ const earlierStyles=window.FIELDNOTES_V37_STYLES||[];
+ window.FIELDNOTES_V37_PLAN=function({round=0}={}){
   const group=((round%2)+2)%2;
-  let trio=styles.slice(group*3,group*3+3);
-  const ordered=ids=>ids.map(id=>styles.find(x=>x[0]===id));
-  if(feedback==='original')trio=ordered(['minimal','journal','coastal']);
-  else if(feedback==='editorial')trio=ordered(['journal','minimal','blueprint']);
-  else if(feedback==='map')trio=ordered(['sky','coastal','blueprint']);
-  else if(feedback==='soft')trio=ordered(['minimal','coastal','journal']);
-  return trio.map((t,i)=>({
-   label:('0'+(i+1))+' · '+t[1],desc:t[2],kind:'p1',
+  if(group===1){
+   const candidates=typeof earlierPlans==='function'
+    ? [...earlierPlans({round:2,feedback:'balanced'}),...earlierPlans({round:3,feedback:'balanced'})] : [];
+   if(candidates.length!==6)throw Error('旧版六种版式未能完整加载，请检查 v37-editorial.js');
+   return candidates.map((entry,i)=>({
+    ...entry,label:String(i+7).padStart(2,'0')+' · '+entry.label.replace(/^\d+\s*·\s*/,''),
+    cfg:{...entry.cfg,p1Kind:null,v37Preset:entry.cfg.v37Preset}
+   }));
+  }
+  return styles.map((t,i)=>({
+   label:String(i+1).padStart(2,'0')+' · '+t[1],
+   desc:t[2],kind:'p1',
    cfg:{p1Kind:t[0],v37Preset:null,
     v35Sidecar:false,frameMode:false,v32NoMap:false,v32Micro:false,
     v32Tone:'original',v32Exposure:0,v32Contrast:0,v32Saturation:0,v32Warm:0,
@@ -352,5 +360,5 @@
   if(!visibleIds.has(state.p1Kind))return oldPaint(ctx,w,h,options);
   const name=state.p1Kind;render(ctx,w,h,name,options);
  };
- window.FIELDNOTES_P1={styles,paintCount:()=>renderCalls,getLocation:()=>({name:normName(),precision:precision(),accurate:state.exact}),coverage:()=>({roads:mapData()?.roads?.length||0,water:mapData()?.water?.length||0}),plan:window.FIELDNOTES_V37_PLAN};
+ window.FIELDNOTES_P1={styles:[...styles,...earlierStyles.slice(6,12).map(x=>[x.id,x.family,x.subtitle])],paintCount:()=>renderCalls,getLocation:()=>({name:normName(),precision:precision(),accurate:state.exact}),coverage:()=>({roads:mapData()?.roads?.length||0,water:mapData()?.water?.length||0}),plan:window.FIELDNOTES_V37_PLAN};
 })();
