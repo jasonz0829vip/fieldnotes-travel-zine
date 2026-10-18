@@ -1796,7 +1796,7 @@ function v32HookControls(){
 
 
 // FIELDNOTES V3.6 · phone install, local share sheet and direct editing.
-const V33_CACHE_KEY='fn39-offline-shell-20261018-2';
+const V33_CACHE_KEY='fn39-offline-shell-20261018-3';
 let v33Prepared=null,v33PreparedUrl=null,v33ManualChoice=false;
 function v33IsPhone(){return matchMedia('(max-width:760px)').matches||/iPhone|iPod|Android/i.test(navigator.userAgent);}
 function v33ScrollTo(selector){const el=document.querySelector(selector);if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}
@@ -2223,6 +2223,7 @@ v35Init();
 <script src="./v36-app.js"></script>
 <script src="./v38-map-core.js"></script>
 <script src="./offline-pack-manager-v38.js"></script>
+<script src="./national-map-provider-v1.js"></script>
 <script src="./v37-editorial.js"></script>
 <script src="./p1-art-direction.js"></script>
 <script src="./p1-ux.js"></script>
