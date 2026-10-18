@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   bundle:
@@ -26,6 +26,20 @@ jobs:
           node --check preview/v39/vendor/pmtiles.bundle.js
           sha256sum preview/v39/vendor/pmtiles.bundle.js
           wc -c preview/v39/vendor/pmtiles.bundle.js
+      - name: Commit verified upstream reader only to this isolated feature branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feature/national-on-demand-map-pipeline-20261018'
+        env:
+          TARGET_BRANCH: feature/national-on-demand-map-pipeline-20261018
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "refs/remotes/origin/$TARGET_BRANCH"
+          git add preview/v39/vendor/pmtiles.bundle.js
+          if ! git diff --cached --quiet; then
+            git commit -m "build(national-map): vendor pinned upstream pmtiles@4.5.0 browser module"
+            git push origin HEAD:"refs/heads/$TARGET_BRANCH"
+          fi
       - name: Export reusable browser library
         uses: actions/upload-artifact@v4
         with:
