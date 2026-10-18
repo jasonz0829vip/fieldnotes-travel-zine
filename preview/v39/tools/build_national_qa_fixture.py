@@ -61,7 +61,7 @@ header={"tile_type":TileType.MVT,"tile_compression":Compression.GZIP,
         "center_lat_e7":round(latitude*1e7),"center_zoom":14}
 with write(str(target)) as w:
     for (z,x,y),raw in sorted(tiles,key=lambda item:zxy_to_tileid(*item[0])):
-        w.write_tile(zxy_to_tileid(z,x,y),gzip.compress(raw,mtime=0))
+        w.write_tile(zxy_to_tileid(z,x,y),raw if raw.startswith(b"\x1f\x8b") else gzip.compress(raw,mtime=0))
     w.finalize(header,metadata)
 record={"region":"杭州市行政中心附近（测试）","z":z,"center":[longitude,latitude],
  "tile_count":len(tiles),"pbf_download_bytes":total,"archive_bytes":target.stat().st_size,
