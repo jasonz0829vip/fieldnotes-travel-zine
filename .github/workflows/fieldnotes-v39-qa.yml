@@ -87,3 +87,11 @@ jobs:
           name: fieldnotes-v39-managed-maps-static
           path: preview/v39/downloads/FIELDNOTES_V3.9_Managed_Maps_Static_Deploy.zip
           retention-days: 7
+      - name: Prepare no-domain ModelScope Static and HTTP Range probe bundle
+        run: python3 preview/v39/tools/prepare_modelscope_static_trial.py
+      - name: Upload ModelScope deployment trial ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-v39-modelscope-static-trial
+          path: preview/v39/downloads/FIELDNOTES_V39_MODELSCOPE_STATIC_TRIAL.zip
+          retention-days: 7
