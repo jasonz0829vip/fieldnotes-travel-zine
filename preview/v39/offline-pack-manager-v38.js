@@ -175,6 +175,24 @@
       }
       list.append(row);
     }
+    // National regions are user-selected, not a hard-coded list of cities.
+    const national=window.FIELDNOTES_NATIONAL_MAP;
+    const downloaded=await national?.list?.()||[];
+    for(const place of downloaded){
+      const row=document.createElement('div');row.className='fn38PackRow';
+      const copy=document.createElement('div'),title=document.createElement('strong'),detail=document.createElement('small');
+      title.textContent=place.label+' · 全国按需地图';
+      detail.textContent='已下载 Z'+place.zoom+' · '+place.tiles+' 张实际瓦片 · '+friendly(place.bytes);
+      copy.append(title,detail);row.append(copy);
+      const action=document.createElement('button');action.type='button';
+      action.disabled=busy;action.textContent='删除这一区域';
+      action.addEventListener('click',()=>run(async()=>{
+        await national.removeById(place.id);
+        setMessage(place.label+' 的精细地图已删除；已导出到相册的作品不受影响。');
+        setTimeout(()=>location.reload(),650);
+      }));
+      row.append(action);list.append(row);
+    }
     if (footprint) {
       if (!supported) footprint.textContent = fileMode
         ? '本地文件模式无法删除磁盘文件；删除解压目录即可彻底移除地图和程序。'
@@ -184,6 +202,7 @@
         for (const spec of PACKS) {
           try { bytes += (await installedInfo(spec))?.bytes || 0; } catch (_) {}
         }
+        bytes+=downloaded.reduce((n,r)=>n+r.bytes,0);
         let site = '';
         if (navigator.storage?.estimate) {
           try {
@@ -240,6 +259,7 @@
     if (!supported) throw Error('本地磁盘文件需在文件管理器中删除');
     if (!confirm('删除本版本下载的全部街道地图？基础离线制图仍可使用，已导出到相册的照片不受影响。')) return;
     for (const spec of PACKS) await caches.delete(packCache(spec));
+    await window.FIELDNOTES_NATIONAL_MAP?.clearAll?.();
     registry.tiles = {};
     registry.regions = [];
     loaded.clear();
@@ -304,7 +324,7 @@
     dialog.id = 'fn38StorageDialog';
     dialog.setAttribute('aria-label','离线地图与存储管理');
     dialog.innerHTML = '<h2>离线地图与存储管理</h2>' +
-      '<p>精细街道按地区独立下载和删除；没有下载的地区仍可使用全国真实行政区轮廓。不会上传你的照片。</p>' +
+      '<p>前三个是原有局部样板；全国按需地图请先在第二步选择地点下载。这里可以删除任意已下载地区。删除地图不影响相册作品。</p>' +
       '<div id="fn38StorageList"></div><p id="fn38StorageFootprint"></p>' +
       '<div class="fn38Controls" id="fn38StorageControls"></div>' +
       '<p id="fn38StorageStatus" role="status" aria-live="polite"></p>';

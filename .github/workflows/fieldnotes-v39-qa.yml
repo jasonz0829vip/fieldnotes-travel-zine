@@ -13,7 +13,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Check P1 JavaScript syntax
@@ -22,6 +22,10 @@ jobs:
           node --check preview/v39/v38-map-core.js
           node --check preview/v39/p1-art-direction.js
           node --check preview/v39/tools/test_p0_real_map_buildings.cjs
+          node --check preview/v39/vendor/pmtiles.js
+          node --check preview/v39/national-map-source.js
+          node --check preview/v39/national-map-provider.js
+          node --check preview/v39/tools/test_national_pmtiles_browser.cjs
           node --check preview/v39/sw.js
           for file in preview/v39/packs/*.js; do node --check "$file"; done
       - name: Regenerate map packs and compare tracked results
@@ -43,6 +47,15 @@ jobs:
         run: node preview/v39/tools/test_v39_three_step_browser.cjs
       - name: P0 bundled building geometry and real Z13 offline coverage
         run: node preview/v39/tools/test_p0_real_map_buildings.cjs
+      - name: Create temporary real Hangzhou Z14 PMTiles fixture (no public upload)
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet pmtiles==3.8.1
+          python3 preview/v39/tools/build_national_qa_fixture.py
+      - name: Browser acceptance for nationwide on-demand PMTiles cache
+        run: node preview/v39/tools/test_national_pmtiles_browser.cjs
+      - name: Delete temporary PMTiles test archive
+        if: always()
+        run: rm -rf preview/v39/tools/.national-qa
       - name: Save real Chromium screenshots for visual review
         if: always()
         uses: actions/upload-artifact@v4
@@ -73,4 +86,12 @@ jobs:
         with:
           name: fieldnotes-v39-managed-maps-static
           path: preview/v39/downloads/FIELDNOTES_V3.9_Managed_Maps_Static_Deploy.zip
+          retention-days: 7
+      - name: Prepare no-domain ModelScope Static and HTTP Range probe bundle
+        run: python3 preview/v39/tools/prepare_modelscope_static_trial.py
+      - name: Upload ModelScope deployment trial ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-v39-modelscope-static-trial
+          path: preview/v39/downloads/FIELDNOTES_V39_MODELSCOPE_STATIC_TRIAL.zip
           retention-days: 7

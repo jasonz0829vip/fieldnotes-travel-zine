@@ -7,10 +7,11 @@ import re, hashlib, json
 root=Path(__file__).resolve().parent.parent
 files=["index.html","manifest.webmanifest","sw.js","v36-app.js","v36.css","v37-editorial.js",
 "v38-map-core.js","p1-art-direction.js","p1-ux.js","offline-pack-manager-v38.js",
+"national-map-source.js","national-map-provider.js",
 "android-save-v36.js","wechat-android-save-v36.js","THIRD_PARTY_LICENSES.txt",
 "OFFLINE_README.txt","P1_DESIGN_NOTES.txt"]
 paths=[root/f for f in files]
-for dirname in ("data","icons","licenses","packs"):
+for dirname in ("data","icons","licenses","packs","vendor"):
     paths += [p for p in (root/dirname).rglob("*") if p.is_file()]
 for p in paths:
     if not p.is_file(): raise FileNotFoundError(str(p))
@@ -19,6 +20,8 @@ for s in re.findall(r'<(?:script|link)[^>]+(?:src|href)=["\']\./([^"\']+)',html)
     if not (root/s.split("?")[0]).is_file(): raise ValueError("Missing static asset "+s)
 sw=(root/"sw.js").read_text(encoding="utf8")
 assert "offline-pack-manager-v38.js" in sw and "offline-tiles-v38.js" not in sw
+assert "national-map-provider.js" in sw and "vendor/pmtiles.js" in sw
+assert "enabled:false" in (root/"national-map-source.js").read_text(encoding="utf8")
 assert "fn39-offline-shell-" in sw and "fn39-pack-" not in sw
 for code in ("469028","310101","610113"):
     package=(root/"packs"/f"{code}.js").read_text(encoding="utf8")
@@ -34,7 +37,9 @@ instructions="""FIELDNOTES V3.9 - 国内静态网站上传包
 要求：
 * 网站必须 HTTPS 才能安装 PWA；确认 HTML/JS/CSS/PNG/.webmanifest MIME 类型正确。
 * 完整保留 data/、icons/、licenses/、packs/ 文件夹，不能只上传 index.html。
-* 街道包按需下载：陵水、上海黄浦、西安雁塔中心局部三包分别缓存，不会首装时全部自动下载；其余地区离线使用真实行政轮廓。
+* 原有3个Z13局部包可管理；全国按需地图程序已准备，但未配置经授权且国内普通网络可用的PMTiles数据源，因此默认不会触发全国下载，其他地区仍使用真实行政轮廓。
+* 部署者必须合法提供支持 HTTPS + CORS + HTTP Range 的静态PMTiles数据源，在 national-map-source.js 内配置后才可启用；绝不能在公开JavaScript中写入访问密钥。
+* 用户同意按地点下载后才会发送地图瓦片索引；不上传照片。全国按需的每个区域会独立缓存，用户可在设置中删除。
 * 国内网站需要符合托管商的实名、域名、ICP备案等要求；此包本身不替代备案，也未通过中国普通网络真机首装验收。
 * 安卓微信最终保存到相册尚需真机核验，苹果现有流程不变。
 * 首次打开需联网；等待基础离线资源缓存完成。需要精细街道时，在「离线地图 / 存储管理」单独下载城市地图，并可单独删除。
