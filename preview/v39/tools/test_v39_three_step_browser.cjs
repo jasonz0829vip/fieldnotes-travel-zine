@@ -85,7 +85,7 @@ async function fingerprint(page){
   assert(details.includes('上海')||details.includes('黄浦'),'expected relevant Chinese region prompt');
   const offerVisible=await page.locator('#v39MapDownload').isVisible();
   assert(offerVisible,'Shanghai Huangpu must offer its mapped center-local street pack, not claim nationwide coverage');
-  assert.equal((await page.evaluate(async()=>await caches.keys())).filter(x=>x.startsWith('fn38p1-pack-')).length,0,
+  assert.equal((await page.evaluate(async()=>await caches.keys())).filter(x=>x.startsWith('fn39-pack-')).length,0,
    'no silent street download on location selection');
   await snap(page,'v39-map-offer-mobile.png');
 

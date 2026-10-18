@@ -19,14 +19,14 @@ for s in re.findall(r'<(?:script|link)[^>]+(?:src|href)=["\']\./([^"\']+)',html)
     if not (root/s.split("?")[0]).is_file(): raise ValueError("Missing static asset "+s)
 sw=(root/"sw.js").read_text(encoding="utf8")
 assert "offline-pack-manager-v38.js" in sw and "offline-tiles-v38.js" not in sw
-assert "fn38p1-offline-shell-" in sw and "fn38p1-pack-" not in sw
+assert "fn39-offline-shell-" in sw and "fn39-pack-" not in sw
 for code in ("469028","310101","610113"):
     package=(root/"packs"/f"{code}.js").read_text(encoding="utf8")
     assert f'"code":"{code}"' in package and "FIELDNOTES_REGISTER_REGION_PACK" in package
 assert "offline-tiles-v38.js" not in html
 assert "offline-pack-manager-v38.js" in html
 
-instructions="""FIELDNOTES V3.8-P1 - 国内静态网站上传包
+instructions="""FIELDNOTES V3.9 - 国内静态网站上传包
 
 请将此 ZIP 解压，将解压后的所有文件和文件夹放在你拥有权限的 HTTPS 静态站点根目录（index.html 在根目录）。
 这是单纯的静态网站，不需要 QLS/3070 做远程服务器，也不需要 ChatGPT、代理或国外 API 运行时请求。
@@ -42,9 +42,9 @@ instructions="""FIELDNOTES V3.8-P1 - 国内静态网站上传包
 
 验收：国内无代理打开 → 等待缓存 → 下载一个区域 → 飞行模式重新打开 → 导入照片/选择该区域 → 出图 → 相册保存 → 删除该区域 → 确认缓存消失且基础行政地图仍可用。
 """
-target=root/"downloads"/"FIELDNOTES_V3.8_P1_Managed_Maps_Static_Deploy.zip"
+target=root/"downloads"/"FIELDNOTES_V3.9_Managed_Maps_Static_Deploy.zip"
 target.parent.mkdir(parents=True,exist_ok=True)
-manifest={"product":"FIELDNOTES V3.8 P1","type":"relocatable-static-root",
+manifest={"product":"FIELDNOTES V3.9","type":"relocatable-static-root",
           "files":{p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}}
 with ZipFile(target,"w",ZIP_DEFLATED,compresslevel=9) as z:
     for p in sorted(paths):z.write(p,p.relative_to(root).as_posix())

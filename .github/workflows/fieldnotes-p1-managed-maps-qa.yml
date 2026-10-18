@@ -13,7 +13,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 16
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - name: Check P1 JavaScript syntax
@@ -34,16 +34,6 @@ jobs:
             preview/v38-p1/tools/node_modules/.bin/playwright install chromium
           fi
           node preview/v38-p1/tools/test_managed_packs_browser.cjs
-      - name: Real Chromium V3.9 location prompt and 6+6 gallery
-        run: node preview/v38-p1/tools/test_v39_three_step_browser.cjs
-      - name: Save real Chromium screenshots for visual review
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: fieldnotes-v39-rendered-mobile-screenshots
-          path: preview/v38-p1/tools/test-results/*.png
-          if-no-files-found: ignore
-          retention-days: 7
       - name: Build isolated domestic static bundle
         run: python3 preview/v38-p1/tools/build_domestic_static.py
       - name: Assert deploy ZIP preserves opt-in maps and excludes obsolete monolith

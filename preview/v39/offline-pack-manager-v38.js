@@ -3,7 +3,7 @@
 (() => {
   'use strict';
   const ROOT = new URL('./', document.currentScript?.src || location.href);
-  const PREFIX = 'fn38p1-';
+  const PREFIX = 'fn39-';
   const PACKS = Object.freeze([
     {code:'469028',key:'lingshui-center',name:'海南·陵水',zoom:13,center:[110.037,18.505]},
     {code:'310101',key:'shanghai-huangpu',name:'上海·黄浦',zoom:13,center:[121.49,31.223]},
@@ -249,7 +249,7 @@
 
   async function clearApplication() {
     if (!supported) throw Error('本地磁盘文件需在文件管理器中删除');
-    if (!confirm('这将清除 FIELDNOTES V3.8-P1 的离线程序及街道缓存。以后必须联网重新打开才能安装；不会删除手机相册、下载文件或其他版本的网页。确定继续？')) return;
+    if (!confirm('这将清除 FIELDNOTES V3.9 的离线程序及街道缓存。以后必须联网重新打开才能安装；不会删除手机相册、下载文件或其他版本的网页。确定继续？')) return;
     const keys = await caches.keys();
     for (const name of keys.filter(x => x.startsWith(PREFIX))) await caches.delete(name);
     const scope = ROOT.href;

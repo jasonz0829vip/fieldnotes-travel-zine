@@ -43,7 +43,7 @@ function server() {
         names:await caches.keys()};
     });
     assert.equal(ready.maps,0,'initially no detailed street map should be downloaded');
-    assert(!ready.names.some(name=>name.startsWith('fn38p1-pack-')));
+    assert(!ready.names.some(name=>name.startsWith('fn39-pack-')));
 
     if (await page.locator('#v39Settings').count()) {
       await page.locator('#v39Settings summary').click();
@@ -81,9 +81,9 @@ function server() {
       if(window.FIELDNOTES_PACK_MANAGER)await window.FIELDNOTES_PACK_MANAGER.ready;
       return {keys:await caches.keys(),tiles:Object.keys(window.FIELDNOTES_OFFLINE_TILES?.tiles||{}).length};
     });
-    assert(!after.keys.some(name=>name.startsWith('fn38p1-pack-310101-')));
+    assert(!after.keys.some(name=>name.startsWith('fn39-pack-310101-')));
     assert.equal(after.tiles,0,'removed pack must stay removed after reload');
-    assert(after.keys.some(name=>name.startsWith('fn38p1-offline-shell-')),'shell survives map deletion');
+    assert(after.keys.some(name=>name.startsWith('fn39-offline-shell-')),'shell survives map deletion');
 
     console.log('PASS Chromium: online install -> offline cold restart -> delete region -> shell preserved');
     await context.close();

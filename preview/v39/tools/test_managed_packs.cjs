@@ -26,8 +26,8 @@ function verifyStatic(){
   const match=html.match(/const V33_CACHE_KEY='([^']+)'/);
   assert(match&&sw.includes('const CACHE=\''+match[1]+'\''));
   assert(!sw.includes("'./offline-tiles-v38.js'"));
-  assert(sw.includes("k.startsWith('fn38p1-offline-shell-')"));
-  assert(!sw.includes("k.startsWith('fn38p1-')"));
+  assert(sw.includes("k.startsWith('fn39-offline-shell-')"));
+  assert(!sw.includes("k.startsWith('fn39-')"));
   let bytes=0;
   const seen=new Set();
   for (const spec of catalog){
@@ -147,7 +147,7 @@ async function verifyLifeCycle(){
 
   await first.api.install(first.api.catalog[0]);
   await storage.open('other-app-cache-20261018');
-  await storage.open('fn38p1-offline-shell-20261018-2');
+  await storage.open('fn39-offline-shell-20261018-1');
   await first.api.clearApplication();
   assert.deepEqual(await storage.keys(),['other-app-cache-20261018']);
   assert.equal(first.unregistered,1);
