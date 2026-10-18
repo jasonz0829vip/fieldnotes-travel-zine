@@ -5,9 +5,9 @@
   const ROOT = new URL('./', document.currentScript?.src || location.href);
   const PREFIX = 'fn38p1-';
   const PACKS = Object.freeze([
-    {code:'469028',key:'lingshui-center',name:'海南·陵水',zoom:13},
-    {code:'310101',key:'shanghai-huangpu',name:'上海·黄浦',zoom:13},
-    {code:'610113',key:'xian-yanta',name:'西安·雁塔',zoom:13}
+    {code:'469028',key:'lingshui-center',name:'海南·陵水',zoom:13,center:[110.037,18.505]},
+    {code:'310101',key:'shanghai-huangpu',name:'上海·黄浦',zoom:13,center:[121.49,31.223]},
+    {code:'610113',key:'xian-yanta',name:'西安·雁塔',zoom:13,center:[108.927,34.213]}
   ]);
   const fileMode = location.protocol === 'file:';
   const supported = !fileMode && typeof caches !== 'undefined';
@@ -75,6 +75,28 @@
     if (!response) return null;
     const blob = await response.clone().blob();
     return {response, bytes:blob.size};
+  }
+
+  // Derive availability from actual three-by-three OSM tile footprints, not a whole city name.
+  // Only the center tile guarantees a complete surrounding 3x3; neighboring tiles are partial.
+  function matchLocation(lon, lat, level = 'county') {
+    if (level === 'province' || !Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+    const xyz = window.FIELDNOTES_STREETS?.xyz;
+    if (typeof xyz !== 'function') return null;
+    for (const spec of PACKS) {
+      const at = xyz(lon, lat, spec.zoom), center = xyz(spec.center[0], spec.center[1], spec.zoom);
+      const dx = Math.abs(at.x - center.x), dy = Math.abs(at.y - center.y);
+      if (dx === 0 && dy === 0) return {spec,coverage:'center',complete:true};
+      if (dx <= 1 && dy <= 1) return {spec,coverage:'edge',complete:false};
+    }
+    return null;
+  }
+
+  function notifyMapsChanged(code, installed) {
+    window.FIELDNOTES_V37_DEBUG?.invalidate?.();
+    if (typeof CustomEvent === 'function' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('fieldnotes:maps-changed',{detail:{code,installed}}));
+    }
   }
 
   function updateSummary() {
@@ -198,6 +220,7 @@
     try {
       await executePack(new Response(blob), spec);
     } catch (e) { await caches.delete(name); throw e; }
+    notifyMapsChanged(spec.code,true);
     setMessage(spec.name + ' 已缓存到本机（' + friendly(blob.size) + '）。断网重新打开仍可使用。');
   }
 
@@ -208,6 +231,7 @@
     for (const key of region?.tileKeys || []) delete registry.tiles[key];
     registry.regions = registry.regions.filter(x => x.code !== spec.code);
     loaded.delete(spec.code);
+    notifyMapsChanged(spec.code,false);
     setMessage(spec.name + ' 的独立离线缓存已删除。页面将刷新，以清掉内存中的地图数据。');
     setTimeout(() => location.reload(), 650);
   }
@@ -302,5 +326,5 @@
     dialog.addEventListener('click', event => {if (event.target === dialog) dialog.close();});
   }
   mount();
-  window.FIELDNOTES_PACK_MANAGER = Object.freeze({catalog:PACKS,ready,install,remove,clearMaps,clearApplication,installedInfo,refresh:render});
+  window.FIELDNOTES_PACK_MANAGER = Object.freeze({catalog:PACKS,ready,install,remove,clearMaps,clearApplication,installedInfo,matchLocation,refresh:render});
 })();
