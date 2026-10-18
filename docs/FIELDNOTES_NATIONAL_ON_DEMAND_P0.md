@@ -46,3 +46,21 @@ CI 使用 **临时** real OSM 杭州市中心 Z14 九瓦片（OpenFreeMap 限额
 - OpenFreeMap 官方仅允许用户在每次限定下载中最多 3,000 张瓦片或 50 MB，且最多 4 个并发；研究下载已严格限制并没有将第三方瓦片公开归档。**不得把该公共服务直接当成我们可无上限转载的全国静态数据源。**
 
 来源：[Geofabrik China](https://download.geofabrik.de/asia/china.html)、[Planetiler](https://github.com/onthegomap/planetiler)、[Tencent COS 默认域名政策](https://cloud.tencent.com/document/faq/436/102489)、[Alibaba OSS 域名策略](https://www.alibabacloud.com/help/zh/oss/user-guide/regions-and-endpoints)、[OpenFreeMap ToS](https://openfreemap.org/tos/)。
+
+## 无自有域名的候选分发实测：ModelScope Static Studio
+
+已核验中国魔搭 ModelScope 支持 static 类型的创空间，预编译的 index.html 可托管在平台生成的 Studio 网址下。现成官方部署 Skill：https://github.com/modelscope/modelscope-skills/blob/main/skills/ms-studio-deploy/SKILL.md 。不需要另造服务器或重新写部署工具。
+
+这是一条**候选方案，不是已验证的家庭生产服务**。通过标准：
+
+1. 中国移动/电信普通手机使用无代理网络访问真正的 Static Studio 应用地址；浏览器可访问不能用网页内嵌 iframe 冒充独立可安装 PWA。
+2. Safari 与安卓 Chrome 从独立网址进入 /probe/ 并点击“开始自检”，必须同时通过 HTTPS、应用 JS、Service Worker、Cache Storage、真正的 HTTP 206 + Content-Range。安卓微信内置浏览器另测照片保存。
+3. 测试真实较小 PMTiles 的 HTTP Range 与跨域 CORS；对 >100MB 文件的 Git LFS、全国地图的长期可用性与托管条款逐项核实。128KB 文件支持 206 不等于全国 GB 级 PMTiles 必定可用。
+4. 如果大型地图不能与 Static Studio 同源托管，保留此处轻量 UI，再选择有明确授权的国内地理数据托管方。不为地图重造服务器。
+
+CI 自动生成 FIELDNOTES_V39_MODELSCOPE_STATIC_TRIAL.zip：完整 V3.9 静态程序 + /probe/index.html + 128 KiB 自有字节区间测试文件。无需 Python 服务器、付费 GPU 或额外域名。全国在线地图源仍保持 disabled，不宣称全国覆盖已交付。
+
+其他方案限制：Gitee Pages 官方下线；EdgeOne Pages 无备案默认预览链接面向大陆有短时效；CloudBase 默认域名存在访问中间页和风控；GitHub Pages 不同大陆网络可达性存在波动。
+来源：https://modelscope.cn/posts/2382 、https://github.com/modelscope/modelscope-skills 、https://pages.edgeone.ai/zh/document/domain-overview 、https://docs.cloudbase.net/service/alias 、https://gitee.com/oschina/git-osc/issues/I9QF16 。
+
+权限与隐私：目前仅在 GitHub 生成测试包，没有获得用户的 ModelScope 账户授权，不会擅自创建资源或让用户在聊天中发送 API Token。如需使用官方部署 Skill，先授权账号，创建 PRIVATE Static Studio，真实手机验收后才考虑公开。
