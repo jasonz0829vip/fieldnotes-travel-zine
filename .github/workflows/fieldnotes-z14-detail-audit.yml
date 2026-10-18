@@ -1,0 +1,31 @@
+name: FIELDNOTES Z14 Geo Detail Research
+on:
+  pull_request:
+    paths:
+      - 'preview/v39/tools/audit_z14_map_detail.cjs'
+      - '.github/workflows/fieldnotes-z14-detail-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: node --check preview/v39/tools/audit_z14_map_detail.cjs
+      - name: Install existing PBF and Vector Tile parsers
+        run: npm install --no-save --ignore-scripts --prefix preview/v39/tools pbf@4.0.1 @mapbox/vector-tile@2.0.4
+      - name: Compare bounded Z13 and Z14 GIS density without redistributing any new tiles
+        run: node preview/v39/tools/audit_z14_map_detail.cjs
+      - name: Retain metrics only; never archive downloaded tile payloads
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-z14-detail-metrics-only
+          path: preview/v39/tools/map-z14-audit-results.json
+          if-no-files-found: ignore
+          retention-days: 7
