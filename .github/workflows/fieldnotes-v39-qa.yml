@@ -13,7 +13,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 16
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - name: Check P1 JavaScript syntax
@@ -38,6 +38,16 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
       - name: Real Chromium V3.9 location prompt and 6+6 gallery
         run: node preview/v39/tools/test_v39_three_step_browser.cjs
+      - name: Visual matrix and real PNG export for two privacy-safe scenes
+        run: node preview/v39/tools/test_v39_visual_matrix.cjs
+      - name: Archive landscape/portrait screenshots and timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-v39-landscape-portrait-visual-matrix
+          path: preview/v39/tools/visual-qa/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Save real Chromium screenshots for visual review
         if: always()
         uses: actions/upload-artifact@v4
