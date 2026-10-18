@@ -3,7 +3,7 @@
 Does not create a ModelScope account, deploy, or contain API tokens.
 """
 from pathlib import Path
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
 import hashlib, json, re
 
 root=Path(__file__).resolve().parent.parent
