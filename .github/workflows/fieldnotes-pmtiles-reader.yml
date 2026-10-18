@@ -1,0 +1,34 @@
+name: FIELDNOTES PMTiles Reader Reuse
+on:
+  pull_request:
+    paths:
+      - 'preview/v39/tools/pmtiles-entry.mjs'
+      - 'preview/v39/national-map-provider-v1.js'
+      - '.github/workflows/fieldnotes-pmtiles-reader.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned upstream PMTiles and esbuild
+        run: npm install --no-save --ignore-scripts --prefix preview/v39/tools pmtiles@4.5.0 esbuild@0.28.2
+      - name: Build only PMTiles official browser reader (no new map engine)
+        run: |
+          mkdir -p preview/v39/vendor
+          preview/v39/tools/node_modules/.bin/esbuild preview/v39/tools/pmtiles-entry.mjs --bundle --minify --format=esm --platform=browser --target=es2020 --outfile=preview/v39/vendor/pmtiles.bundle.js
+          test -s preview/v39/vendor/pmtiles.bundle.js
+          node --check preview/v39/vendor/pmtiles.bundle.js
+          sha256sum preview/v39/vendor/pmtiles.bundle.js
+          wc -c preview/v39/vendor/pmtiles.bundle.js
+      - name: Export reusable browser library
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-pinned-pmtiles-reader-js
+          path: preview/v39/vendor/pmtiles.bundle.js
+          retention-days: 7
