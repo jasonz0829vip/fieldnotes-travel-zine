@@ -32,7 +32,7 @@ function measure(buf,at){
     // Polygon rings include holes; count is not synonymous with number of buildings.
     const geometry=src.feature(i).loadGeometry();
     rings+=geometry.length;
-    for(const x of geometry)geometryCommands+=x.length;
+    for(const x of geometry)geometryCommands+=Array.isArray(x)?x.length:(Number.isFinite(x?.x)?1:0);
    }
   }
   stats.byLayer[layer]={features:src.length,rings,vertices:geometryCommands};
