@@ -147,9 +147,13 @@ async function verifyLifeCycle(){
 
   await first.api.install(first.api.catalog[0]);
   await storage.open('other-app-cache-20261018');
+  await storage.open('fn38p1-offline-shell-20261018-2');
+  await storage.open('fn38p1-pack-310101-20261018-1');
   await storage.open('fn39-offline-shell-20261018-1');
   await first.api.clearApplication();
-  assert.deepEqual(await storage.keys(),['other-app-cache-20261018']);
+  assert.deepEqual(await storage.keys(),[
+    'other-app-cache-20261018','fn38p1-offline-shell-20261018-2','fn38p1-pack-310101-20261018-1'
+  ], 'deleting V3.9 must never delete legacy V3.8-P1 regional maps or app shell');
   assert.equal(first.unregistered,1);
 }
 
