@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FIELDNOTES · 国内首次使用验收</title>
+<style>
+:root{font-family:system-ui,-apple-system,"PingFang SC",sans-serif;color:#253b32;background:#f6f7f3}
+*{box-sizing:border-box}main{max-width:690px;margin:30px auto;padding:16px}
+h1{font-size:clamp(22px,5vw,32px);margin:4px 0}
+p{line-height:1.7;font-size:14px;color:#5a7164}
+.card{background:white;border:1px solid #d6e3d9;border-radius:18px;padding:17px;margin:14px 0}
+button,a.button{border:0;background:#24583e;color:white;font-size:15px;border-radius:11px;padding:13px 18px;cursor:pointer;display:inline-block;text-decoration:none}
+button:disabled{opacity:.55}a.button{background:#e6efea;color:#224b37}
+.pass{color:#21653e}.fail{color:#ab4135}.warn{color:#89641c}
+dt{font-weight:700;margin:13px 0 3px}dd{margin:0 0 8px;line-height:1.6;word-break:break-word}
+pre{background:#f1f4ef;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px}
+small{color:#677a70}
+</style>
+</head>
+<body><main>
+<p>FIELDNOTES · 无域名发布能力测试</p>
+<h1>国内手机网络验收</h1>
+<p>本页检查网站能否支持程序加载、离线运行和大地图的分段下载。<b>不会读取或上传照片、通讯录、地理位置或其他个人数据。</b>测试结果仅留在本机，点击复制后才会进入剪贴板。</p>
+<section class="card">
+  <button id="run" type="button">开始自检</button>
+  <a href="../" class="button">打开 FIELDNOTES</a>
+  <p id="summary">还没有运行测试。</p>
+  <dl id="results"></dl>
+</section>
+<section class="card">
+  <p>测试完整内容（只供复制分享）</p>
+  <pre id="json" aria-label="测试 JSON">尚未生成</pre>
+  <button id="copy" type="button" disabled>复制结果</button>
+</section>
+<p><small>判断标准：HTTPS / App 静态资源 / Service Worker / 缓存 / HTTP Range 206 全通过。单次国外或 CI 成功不代表国内长期可用，须分别在国内 iPhone Safari、安卓 Chrome 与微信内置浏览器实测。</small></p>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const base=new URL('../',location.href);
+let recent=null;
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const call=async fn=>{
+ const start=performance.now();
+ try{const info=await fn();return {ok:!!info.ok,elapsed_ms:Math.round(performance.now()-start),...info}}
+ catch(e){return {ok:false,elapsed_ms:Math.round(performance.now()-start),error:String(e?.message||e)}}
+};
+const timeoutFetch=async(url,options={})=>{
+ const ctrl=new AbortController();let id=setTimeout(()=>ctrl.abort(),14000);
+ try{return await fetch(url,{...options,signal:ctrl.signal,cache:'no-store'})}
+ finally{clearTimeout(id)}
+};
+async function test(){
+ const a={at:new Date().toISOString(),origin:location.origin,platform:'FIELDNOTES distribution probe v1',results:{}};
+ a.results.secure={ok:location.protocol==='https:'&&isSecureContext,protocol:location.protocol};
+ a.results.app=await call(async()=>{
+  const res=await timeoutFetch(new URL('index.html',base).href);
+  if(!res.ok)return {ok:false,http:res.status};
+  const s=await res.text();
+  return {ok:s.includes('FIELDNOTES')&&s.includes('v36Flow'),http:res.status,
+    bytes:s.length,hasUI:s.includes('v36Flow')};
+ });
+ a.results.mapReader=await call(async()=>{
+  const res=await timeoutFetch(new URL('vendor/pmtiles.js',base).href);
+  if(!res.ok)return {ok:false,http:res.status};
+  const s=await res.text();
+  return {ok:s.includes('pmtiles'),http:res.status,bytes:s.length};
+ });
+ a.results.range=await call(async()=>{
+  const url=new URL('probe/range-proof.bin',base).href;
+  const r=await timeoutFetch(url,{headers:{Range:'bytes=777-1800'}});
+  const data=await r.arrayBuffer();
+  const h=r.headers.get('Content-Range')||'';
+  const ok=r.status===206 && data.byteLength===1024 && /^bytes 777-1800\/131072$/.test(h);
+  return {ok,http:r.status,bytes:data.byteLength,contentRange:h,acceptRanges:r.headers.get('Accept-Ranges')};
+ });
+ a.results.serviceWorker=await call(async()=>{
+  if(!('serviceWorker' in navigator))return {ok:false,error:'Service Worker unsupported'};
+  const reg=await navigator.serviceWorker.register(new URL('sw.js',base).href,{scope:base.pathname});
+  await Promise.race([navigator.serviceWorker.ready,new Promise((_,rej)=>setTimeout(()=>rej(Error('SW wait timeout')),10000))]);
+  return {ok:reg.active?.state==='activated'||reg.waiting?.state==='installed',scope:reg.scope,
+    active:reg.active?.state||'none'};
+ });
+ a.results.cache=await call(async()=>{
+  if(!('caches' in window))return {ok:false,error:'CacheStorage unsupported'};
+  const names=await caches.keys();
+  const shells=names.filter(x=>x.startsWith('fn39-offline-shell-'));
+  let html=false;
+  for(const name of shells){
+   const res=await (await caches.open(name)).match(new URL('index.html',base).href);
+   if(res){html=true;break;}
+  }
+  return {ok:html,foundShells:shells.length,hasOfflineIndex:html};
+ });
+ a.results.mapSource=await call(async()=>{
+  const resp=await timeoutFetch(new URL('national-map-source.js',base).href);
+  const content=await resp.text();
+  return {ok:resp.ok&&content.includes('FIELDNOTES_NATIONAL_SOURCE'),
+    sourceConfigured:!/enabled:\s*false/.test(content),
+    note:'Source readiness separate from hosting transport'};
+ });
+ a.summary=Object.values(a.results).filter(v=>v.ok).length+'/'+Object.keys(a.results).length+' passed';
+ return a;
+}
+function paint(a){
+ $('results').replaceChildren();
+ const labels={secure:'HTTPS 环境',app:'应用文件',mapReader:'地图读取器',range:'HTTP Range 206',serviceWorker:'离线 Service Worker',cache:'离线缓存',mapSource:'地图源配置文件'};
+ for(const [key,v] of Object.entries(a.results)){
+  const dt=document.createElement('dt'),dd=document.createElement('dd');
+  dt.textContent=(v.ok?'✓ ':'✕ ')+(labels[key]||key);
+  dt.className=v.ok?'pass':'fail';
+  dd.textContent=v.ok ? '通过 · '+v.elapsed_ms+' ms' : '未通过 · '+(v.error||'HTTP '+(v.http??'?'));
+  if(key==='range')dd.textContent+=' · '+(v.contentRange||'无 Content-Range');
+  $('results').append(dt,dd);
+ }
+ $('summary').textContent=a.summary+'。地图源是否可用于中国全国下载，还需独立验证。';
+ $('json').textContent=JSON.stringify(a,null,2);
+ $('copy').disabled=false;
+}
+$('run').addEventListener('click',async()=>{
+ $('run').disabled=true;$('summary').textContent='正在检查（最多约 45 秒）…';
+ try{recent=await test();paint(recent)}
+ catch(e){$('summary').textContent='测试程序异常：'+(e?.message||e)}
+ finally{$('run').disabled=false;}
+});
+$('copy').addEventListener('click',async()=>{
+ if(!recent)return;
+ const s=JSON.stringify(recent,null,2);
+ try{await navigator.clipboard.writeText(s);$('copy').textContent='已复制';}
+ catch(_){
+  const box=document.createElement('textarea');box.value=s;document.body.append(box);box.select();
+  document.execCommand('copy');box.remove();$('copy').textContent='请检查是否已复制';
+ }
+});
+})();
+</script>
+</main></body></html>
