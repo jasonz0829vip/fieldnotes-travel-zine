@@ -64,7 +64,7 @@ async function prepare(){
  const promise=base.streets(loc.lon,loc.lat,loc.level).then(data=>{
    if(lastKey!==key)return null;
    mapResult=data;lastError='';mapInfo.status='loaded';mapInfo.tiles=data.sources;
-   mapInfo.detail=('Z'+data.zoom+(data.zoomFallback?'（已使用本机真实Z13图层，非放大后的精确Z'+data.requestedZoom+'）':'')+
+   mapInfo.detail=('Z'+data.zoom+(data.zoomFallback?'（实际使用本机真实Z'+data.zoom+'，默认请求Z'+data.requestedZoom+'）':'')+
     ' · '+data.roads.length+' 道路 · '+data.water.length+' 水面 · '+data.river.length+
     ' 水道 · '+(data.buildings?.length||0)+' 建筑面'+(data.partial?' · 部分瓦片覆盖':''));
    renderedVersion++;return data;
