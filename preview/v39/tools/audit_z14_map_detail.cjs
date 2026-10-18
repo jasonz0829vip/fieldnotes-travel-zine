@@ -5,8 +5,7 @@
  */
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const {VectorTile}=require('@mapbox/vector-tile');
-const Pbf=require('pbf');
+let VectorTile,Pbf; // Load existing proven open-source decoders through ESM/CJS-compatible imports.
 const root=path.resolve(__dirname,'..'),resultFile=path.join(__dirname,'map-z14-audit-results.json');
 const CATALOG=[
  {code:'469028',region:'海南陵水中心',center:[110.037,18.505]},
@@ -55,6 +54,9 @@ function summary(items,region,zoom){
  t.areaKm2=+t.areaKm2.toFixed(2);return t;
 }
 (async()=>{
+ const modules=await Promise.all([import('@mapbox/vector-tile'),import('pbf')]);
+ VectorTile=modules[0].VectorTile;Pbf=modules[1].default||modules[1].Pbf;
+ if(typeof VectorTile!=='function'||typeof Pbf!=='function')throw Error('OpenMapTiles decoder imports failed');
  const local={};
  for(const region of CATALOG){
   const file=path.join(root,'packs',region.code+'.js'),ctx={window:{FIELDNOTES_REGISTER_REGION_PACK(pack){this.pack=pack;}}};
