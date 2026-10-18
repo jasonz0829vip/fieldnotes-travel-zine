@@ -123,9 +123,9 @@
  function bestZoom(lon,lat){
   const m=matched(lon,lat);if(!m)return null;
   // The exact 3x3 requested tile footprint must be available.
-  return m.keys.every(key=>tileOwners.has(key))?Z:null;
+  return m.keys.filter(key=>tileOwners.has(key)).length>=5?Z:null;
  }
- async function install(lon,lat){
+ async function install(lon,lat,label='本地地图'){
   if(!supported)throw Error('此运行方式不支持手机持久地图缓存');
   await ready;
   const m=matched(lon,lat);if(!m)throw Error('地图坐标不正确');
@@ -150,7 +150,7 @@
   await Promise.all([worker(),worker(),worker()]);
   if(!staged.length)throw Error('该区域暂时没有实际矢量地图数据');
   const record={id:m.id,zoom:Z,version:sourceId,tiles:staged.map(x=>x.tile),bytes:total,
-   installedAt:new Date().toISOString(),source:'PMTiles © OpenStreetMap contributors'};
+   installedAt:new Date().toISOString(),label:String(label||'本地地图').slice(0,36),source:'PMTiles © OpenStreetMap contributors'};
   try{
    const cache=await caches.open(m.id);
    for(const item of staged){
@@ -172,7 +172,7 @@
  }
  async function list(){
   await ready;return [...regions.values()].map(r=>({
-   id:r.id,zoom:r.zoom,tiles:r.tiles.length,bytes:r.bytes,installedAt:r.installedAt}));
+   id:r.id,label:r.label||'本地区域',zoom:r.zoom,tiles:r.tiles.length,bytes:r.bytes,installedAt:r.installedAt}));
  }
  async function clearAll(){
   await ready;
