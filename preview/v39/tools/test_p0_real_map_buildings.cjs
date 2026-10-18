@@ -74,6 +74,33 @@ function server(){
    assert(d.buildings>200,'Building MVT layer decoded too sparsely: '+level);
    assert(d.sources>0);
   }
+  // Other bundled regions: assert honest differences in real geographic density.
+  const otherRegions=await page.evaluate(async()=>{
+   const regions=[
+    {code:'469028',coords:[110.037,18.505],label:'陵水'},
+    {code:'610113',coords:[108.927,34.213],label:'西安雁塔'}
+   ];
+   const result={};
+   for(const r of regions){
+    const spec=window.FIELDNOTES_PACK_MANAGER.catalog.find(x=>x.code===r.code);
+    await window.FIELDNOTES_PACK_MANAGER.install(spec);
+    const d=await window.FIELDNOTES_STREETS.streets(r.coords[0],r.coords[1],'gps');
+    result[r.label]={zoom:d.zoom,requestedZoom:d.requestedZoom,
+      sources:d.sources,roads:d.roads.length,river:d.river.length,
+      buildings:d.buildings?.length||0};
+   }
+   return result;
+  });
+  console.log('MAP_P0_OTHER_REGIONS',JSON.stringify(otherRegions));
+  assert.equal(otherRegions['陵水'].zoom,13);
+  assert(otherRegions['陵水'].roads>30&&otherRegions['陵水'].buildings>0);
+  assert.equal(otherRegions['西安雁塔'].zoom,13);
+  assert(otherRegions['西安雁塔'].roads>500&&otherRegions['西安雁塔'].buildings>200);
+  // Region outside all packs never claims fine-grained street coverage.
+  const noFalseCoverage=await page.evaluate(()=>
+   window.FIELDNOTES_PACK_MANAGER.matchLocation(120.15,30.26,'county')
+  );
+  assert.equal(noFalseCoverage,null);
   // Cold offline restart: all real layers must remain, with no overseas requests.
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded',timeout:30000});
