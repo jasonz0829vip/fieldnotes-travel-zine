@@ -1,0 +1,31 @@
+name: FIELDNOTES National Map Source Feasibility
+on:
+  pull_request:
+    paths:
+      - 'preview/v39/tools/probe_national_coverage.cjs'
+      - '.github/workflows/fieldnotes-national-map-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check national benchmark syntax
+        run: node --check preview/v39/tools/probe_national_coverage.cjs
+      - name: Install existing mature MVT and PBF parsers
+        run: npm install --no-save --ignore-scripts --prefix preview/v39/tools @mapbox/vector-tile@2.0.4 pbf@4.0.1
+      - name: Research only - 16 anonymous Chinese locations, 16 tiles maximum
+        run: node preview/v39/tools/probe_national_coverage.cjs
+      - name: Record statistics only without downloaded tiles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-national-map-coverage-metrics
+          path: preview/v39/tools/national-map-probe-results.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,48 @@
+name: FIELDNOTES PMTiles Reader Reuse
+on:
+  pull_request:
+    paths:
+      - 'preview/v39/tools/pmtiles-entry.mjs'
+      - 'preview/v39/national-map-provider-v1.js'
+      - '.github/workflows/fieldnotes-pmtiles-reader.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned upstream PMTiles and esbuild
+        run: npm install --no-save --ignore-scripts --prefix preview/v39/tools pmtiles@4.5.0 esbuild@0.28.2
+      - name: Build only PMTiles official browser reader (no new map engine)
+        run: |
+          mkdir -p preview/v39/vendor
+          preview/v39/tools/node_modules/.bin/esbuild preview/v39/tools/pmtiles-entry.mjs --bundle --minify --format=esm --platform=browser --target=es2020 --outfile=preview/v39/vendor/pmtiles.bundle.js
+          test -s preview/v39/vendor/pmtiles.bundle.js
+          node --check preview/v39/vendor/pmtiles.bundle.js
+          sha256sum preview/v39/vendor/pmtiles.bundle.js
+          wc -c preview/v39/vendor/pmtiles.bundle.js
+      - name: Commit verified upstream reader only to this isolated feature branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feature/national-on-demand-map-pipeline-20261018'
+        env:
+          TARGET_BRANCH: feature/national-on-demand-map-pipeline-20261018
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "refs/remotes/origin/$TARGET_BRANCH"
+          git add preview/v39/vendor/pmtiles.bundle.js
+          if ! git diff --cached --quiet; then
+            git commit -m "build(national-map): vendor pinned upstream pmtiles@4.5.0 browser module"
+            git push origin HEAD:"refs/heads/$TARGET_BRANCH"
+          fi
+      - name: Export reusable browser library
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-pinned-pmtiles-reader-js
+          path: preview/v39/vendor/pmtiles.bundle.js
+          retention-days: 7

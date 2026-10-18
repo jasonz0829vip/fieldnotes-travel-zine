@@ -1,0 +1,61 @@
+name: FIELDNOTES Actual Mainland Region PMTiles E2E
+on:
+  pull_request:
+    paths:
+      - 'preview/v39/tools/test_national_pmtiles_real.cjs'
+      - 'preview/v39/national-map-provider-v1.js'
+      - '.github/workflows/fieldnotes-real-hainan-pmtiles.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hainan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Java 25 for pinned Planetiler
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Download a lawful, bounded Hainan OSM extract and pinned Planetiler
+        run: |
+          mkdir -p /tmp/fieldnotes-gis
+          curl -fL --retry 2 --max-time 130 -o /tmp/fieldnotes-gis/hainan.osm.pbf https://download.geofabrik.de/asia/china/hainan-latest.osm.pbf
+          curl -fL --retry 2 --max-time 180 -o /tmp/fieldnotes-gis/planetiler.jar https://github.com/onthegomap/planetiler/releases/download/v0.10.2/planetiler.jar
+          du -h /tmp/fieldnotes-gis/hainan.osm.pbf /tmp/fieldnotes-gis/planetiler.jar
+      - name: Convert real OSM Hainan extract to PMTiles (ephemeral build only)
+        run: |
+          java -Xmx2g -jar /tmp/fieldnotes-gis/planetiler.jar \
+            --osm-path=/tmp/fieldnotes-gis/hainan.osm.pbf \
+            --output=/tmp/fieldnotes-gis/hainan.pmtiles \
+            --download \
+            --water-polygons-url=https://raw.githubusercontent.com/onthegomap/planetiler/main/planetiler-core/src/test/resources/water-polygons-split-3857.zip \
+            --natural-earth-url=https://raw.githubusercontent.com/onthegomap/planetiler/main/planetiler-core/src/test/resources/natural_earth_vector.sqlite.zip \
+            --maxzoom=14 \
+            --force
+          test -s /tmp/fieldnotes-gis/hainan.pmtiles
+          du -h /tmp/fieldnotes-gis/hainan.pmtiles
+      - name: Install pinned browser/test dependencies without remote-desktop tools
+        run: |
+          npm install --no-save --ignore-scripts --prefix preview/v39/tools playwright@1.56.1 pmtiles@4.5.0 @mapbox/vector-tile@2.0.4 pbf@4.0.1
+          if [ ! -x /usr/bin/google-chrome ] && [ ! -x /usr/bin/chromium ] && [ ! -x /usr/bin/chromium-browser ]; then
+            preview/v39/tools/node_modules/.bin/playwright install chromium
+          fi
+      - name: Test actual non-demo Haikou location with HTTP Range, offline and deletion
+        env:
+          FN_PMTILES_FILE: /tmp/fieldnotes-gis/hainan.pmtiles
+        run: node preview/v39/tools/test_national_pmtiles_real.cjs
+      - name: Export screenshot only, never publish map archives or private photos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldnotes-national-haikou-pmtiles-test-screenshot
+          path: |
+            preview/v39/tools/haikou-real-national-preview.png
+            preview/v39/tools/haikou-national-failure.png
+          if-no-files-found: ignore
+          retention-days: 7

@@ -6,7 +6,7 @@ import re, hashlib, json
 
 root=Path(__file__).resolve().parent.parent
 files=["index.html","manifest.webmanifest","sw.js","v36-app.js","v36.css","v37-editorial.js",
-"v38-map-core.js","p1-art-direction.js","p1-ux.js","offline-pack-manager-v38.js",
+"v38-map-core.js","p1-art-direction.js","p1-ux.js","offline-pack-manager-v38.js","national-map-provider-v1.js",
 "android-save-v36.js","wechat-android-save-v36.js","THIRD_PARTY_LICENSES.txt",
 "OFFLINE_README.txt","P1_DESIGN_NOTES.txt"]
 paths=[root/f for f in files]

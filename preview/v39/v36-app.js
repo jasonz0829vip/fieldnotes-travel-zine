@@ -81,57 +81,83 @@ function mapPrompt(text,kind,withButtons=false){
 }
 async function checkLocalMap(record=null,levelOverride=null){
  const ticket=++mapPromptSerial;
- const manager=window.FIELDNOTES_PACK_MANAGER;
+ const manager=window.FIELDNOTES_PACK_MANAGER, national=window.FIELDNOTES_NATIONAL_MAP;
  const lon=state.centerLon,lat=state.centerLat;
  offeredMap=null;
  if(lon==null||lat==null||!Number.isFinite(Number(lon))||!Number.isFinite(Number(lat))){
   resetMapPrompt();return;
  }
- if(!manager?.matchLocation){
-  mapPrompt('已准备基础地理轮廓，可直接生成作品。','base');return;
- }
  try{
-  await manager.ready;
+  await manager?.ready;await national?.ready;
   if(ticket!==mapPromptSerial)return;
   const level=levelOverride||record?.level||'city';
-  const match=manager.matchLocation(Number(lon),Number(lat),level);
-  if(!match){
-   const geo=record?.code?geometryFallback(record.code):null;
-   const boundary=geo?.approx?'对应区域暂用真实上级行政轮廓':'当前位置可使用基础地理轮廓';
-   mapPrompt(boundary+'；暂无可下载的精细街道包，不影响生成。','base');return;
-  }
-  const spec=match.spec;
+  const near=manager?.matchLocation?.(Number(lon),Number(lat),level)||null;
+  const nationalState=national?.status?.(Number(lon),Number(lat),level)||{kind:'unavailable'};
   const localFile=location.protocol==='file:';
-  const already=localFile
-   ? Boolean(window.FIELDNOTES_OFFLINE_TILES?.regions?.some(x=>x.code===spec.code))
-   : Boolean(await manager.installedInfo(spec));
+  const localInstalled=near&&(localFile
+   ? Boolean(window.FIELDNOTES_OFFLINE_TILES?.regions?.some(x=>x.code===near.spec.code))
+   : Boolean(await manager.installedInfo(near.spec)));
   if(ticket!==mapPromptSerial)return;
-  if(already){
-   mapPrompt('✓ '+spec.name+'中心局部精细街道已在本机。'+(match.complete?'可直接生成。':'当前位置临近预装范围边缘，仅部分街道可用。'),'installed');return;
+  if(nationalState.kind==='installed'&&(!localInstalled||nationalState.zoom>=near.spec.zoom)){
+   mapPrompt('✓ 已缓存此处真实 Z'+nationalState.zoom+' 地图（'+
+    nationalState.covered+'/'+nationalState.needed+' 张瓦片）。'+
+    (nationalState.complete?'道路、水系、建筑可按数据实际情况绘制。':'当前仅部分瓦片覆盖；缺失处回退基础地图。'),'installed');
+   return;
   }
-  if(!navigator.onLine||localFile||typeof caches==='undefined'){
-   mapPrompt('当前无法下载'+spec.name+'精细街道包。基础地图可正常出图。','base');return;
+  // A verified national archive may improve an old Z13 local demonstration; never claim
+  // archive bounds alone prove there are buildings in every location.
+  if(nationalState.kind==='candidate'&&(!near||nationalState.zoom>near.spec.zoom)){
+   offeredMap={national:true,lng:Number(lon),lat:Number(lat),label:record?.name||'当前地点',
+    sourceName:nationalState.name,zoom:nationalState.zoom};
+   mapPrompt((localInstalled?'本机已有局部 Z13 地图。':'本机目前使用基础地理地图。')+
+    '已配置覆盖该位置的 Z'+nationalState.zoom+' 矢量地图来源。下载时将校验真实道路、水系和建筑；可能因数据缺失而无法增强。只下载该处周围小范围，或直接使用现有地图。','offer',true);
+   $36('v39MapDownload').textContent='尝试下载当前地点精细地图';
+   return;
   }
-  offeredMap=match;
-  mapPrompt(spec.name+'中心附近有更精细的街道和水系地图（'+(match.complete?'当前地点位于完整瓦片覆盖中心。':'当前地点在局部覆盖边缘，可能只有部分街道。')+'），下载可提升效果；也可以直接使用基础地图。',match.complete?'offer':'partial',true);
-  $36('v39MapDownload').textContent='下载'+spec.name+'地图';
+  if(near){
+   if(localInstalled){
+    mapPrompt('✓ '+near.spec.name+'中心局部真实 Z'+near.spec.zoom+' 街道地图已缓存。'+
+     (near.complete?'可直接生成。':'附近仅局部覆盖，其他区域将回退。'),'installed');
+    return;
+   }
+   if(navigator.onLine===false||localFile||typeof caches==='undefined'){
+    mapPrompt('当前无法下载 '+near.spec.name+' 精细地图，基础行政轮廓仍可正常出图。','base');return;
+   }
+   offeredMap=near;
+   mapPrompt(near.spec.name+'有小范围真实道路和水系地图。'+
+    (near.complete?'当前位置在中心区域。':'当前位置接近已有区域边缘，可能只有部分瓦片。')+
+    '可选择下载，也可以直接继续。',near.complete?'offer':'partial',true);
+   $36('v39MapDownload').textContent='下载'+near.spec.name+'地图';
+   return;
+  }
+  const geo=record?.code?geometryFallback(record.code):null;
+  const boundary=geo?.approx?'暂以真实上级行政轮廓绘图':'可使用真实基础行政轮廓绘图';
+  mapPrompt(boundary+'；目前没有对此地点已验证的精细地图分发入口，不会虚报全国已可下载。','base');
  }catch(e){
   if(ticket!==mapPromptSerial)return;
-  mapPrompt('地图状态检查暂时失败，基础地图仍可出图。','base');
+  mapPrompt('精细地图状态检查暂不可用，基础地图仍可生成作品。','base');
  }
 }
 async function downloadSuggestedMap(){
- const match=offeredMap,manager=window.FIELDNOTES_PACK_MANAGER;
- if(!match||!manager)return;
+ const match=offeredMap,manager=window.FIELDNOTES_PACK_MANAGER,national=window.FIELDNOTES_NATIONAL_MAP;
+ if(!match)return;
  const button=$36('v39MapDownload');
  button.disabled=true;
- mapPrompt('正在下载 '+match.spec.name+' 精细街道（只保存在本机，不上传照片）…','offer');
+ mapPrompt('正在校验和缓存真实矢量地图（只保存地理瓦片，不上传照片）…','offer');
  try{
-  await manager.install(match.spec);
+  if(match.national){
+   const result=await national.installAt(match.lng,match.lat,match.label);
+   mapPrompt('✓ 当前地点已缓存真实 Z'+result.zoom+' 地图：'+result.downloaded+'/'+result.expected+
+    ' 张瓦片，约 '+(result.bytes/1048576).toFixed(2)+' MB。'+
+    (result.complete?'可以直接生成。':'仅部分区域有数据，将自动回退基础地图。'),'installed');
+  }else{
+   await manager.install(match.spec);
+  }
   await checkLocalMap(chosen,state.gpsFromPhoto?'gps':null);
  }catch(e){
   offeredMap=match;
-  mapPrompt('精细地图下载未成功：'+(e?.message||'请检查网络')+'。不影响使用基础地图。','partial',true);
+  mapPrompt('没有下载成功：'+(e?.message||'网络或地图数据不可用')+
+   '。可以继续用基础地理地图生成，不会强制下载。','partial',true);
  }finally{button.disabled=false;}
 }
 
