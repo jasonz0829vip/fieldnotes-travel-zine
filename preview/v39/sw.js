@@ -1,5 +1,5 @@
 /* FIELDNOTES V3.9: cache public app shell only; never store personal photos */
-const CACHE='fn39-offline-shell-20261018-1';
+const CACHE='fn39-offline-shell-20261018-2';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./v36.css','./v36-app.js','./v38-map-core.js','./offline-pack-manager-v38.js','./v37-editorial.js','./p1-art-direction.js','./p1-ux.js','./android-save-v36.js','./wechat-android-save-v36.js','./data/china-index-v36.js','./data/china-county-v36.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('fn39-offline-shell-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});
