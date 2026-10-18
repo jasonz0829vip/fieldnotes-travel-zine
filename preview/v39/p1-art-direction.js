@@ -111,13 +111,30 @@
  }
  const classify=kind=>['motorway','trunk','primary','secondary'].includes(kind)?2:
    ['tertiary','minor','street'].includes(kind)?1:0;
+ function fillRealBuilding(ctx,rings,rect,loc,span){
+  if(!Array.isArray(rings)||!rings.length)return false;
+  // Even-odd preserves real courtyard and inner-ring geometry from MVT polygons.
+  ctx.beginPath();let any=false;
+  for(const ring of rings){
+   if(!Array.isArray(ring)||ring.length<4)continue;
+   const stride=Math.max(1,Math.ceil(ring.length/450));let first=true,n=0;
+   for(let j=0;j<ring.length;j+=stride){
+    const xy=rectMapPoint(ring[j],rect,loc.lat,loc.lon,span);
+    if(!xy)continue;
+    if(first){ctx.moveTo(xy[0],xy[1]);first=false}else ctx.lineTo(xy[0],xy[1]);n++;
+   }
+   if(n>2){ctx.closePath();any=true;}
+  }
+  if(any)ctx.fill('evenodd');
+  return any;
+ }
  function drawGeometry(ctx,rect,loc,style,params={}){
   const data=mapData(),span=params.span||10500,w=rect.w;
-  if(!data||(!data.roads?.length&&!data.water?.length)){
+  if(!data||(!data.roads?.length&&!data.water?.length&&!data.buildings?.length)){
    return outline(ctx,rect,style.road,params.alpha||.5)?'outline':'none';
   }
   ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
-  const roads=data.roads||[],water=data.water||[],river=data.river||[],parks=data.parks||[];
+  const roads=data.roads||[],water=data.water||[],river=data.river||[],parks=data.parks||[],buildings=data.buildings||[];
   const a=params.alpha===undefined?.75:params.alpha;
   if(params.water!==false){
    ctx.fillStyle=style.water;ctx.globalAlpha=a*(params.waterAlpha||.13);
@@ -132,6 +149,17 @@
   if(params.parks){
    ctx.fillStyle=style.green;ctx.globalAlpha=a*.11;
    for(const [,p]of parks)if(trace(ctx,p,rect,loc,span,true))ctx.fill();
+  }
+  if(params.buildings!==false&&buildings.length){
+   // Deterministic sampling bounds mobile Canvas work; polygons are never invented.
+   const budget=Math.min(buildings.length,params.buildingBudget||1000);
+   const stride=Math.max(1,Math.ceil(buildings.length/budget));
+   ctx.fillStyle=style.major||style.road;
+   ctx.globalAlpha=a*(params.buildingAlpha===undefined?.18:params.buildingAlpha);
+   for(let i=0;i<buildings.length;i+=stride){
+    const rings=buildings[i][1];if(!rings?.length)continue;
+    fillRealBuilding(ctx,rings,rect,loc,span);
+   }
   }
   if(params.roads!==false){
    for(let phase=0;phase<3;phase++){
