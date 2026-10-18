@@ -7,7 +7,8 @@ const src=window.FN_CHINA,countyDB=window.FN_CHINA_COUNTIES;
 if(!src||!countyDB){const el=$36('v36Status');if(el)el.textContent='全国离线地图库未加载，请保持全部文件在同一文件夹中。';return;}
 const records=src.records.map(([code,name])=>({code,name,level:code.endsWith('0000')?'province':code.endsWith('00')?'city':'county'}));
 const byCode=new Map(records.map(r=>[r.code,r]));
-const decoded=new Map(),variants=[];
+const decoded=new Map(),variants=[],batchCache=new Map();
+let cachedSignature='',mapPromptSerial=0,offeredMap=null;
 let chosen=null,drawRound=0,feedback='balanced',generating=false,lastPhotoToken=0,selected=0;
 function dataFor(code){return src.geometry[code]||countyDB[code]||null;}
 function decode(s){let i=0,x=0,y=0,points=[];
@@ -61,8 +62,83 @@ function rank(query){
  return results.sort((a,b)=>b.score-a.score||a.r.name.localeCompare(b.r.name,'zh')).slice(0,10).map(x=>x.r);
 }
 function status(text,error=false){const el=$36('v36Status');if(el){el.textContent=text;el.classList.toggle('v36-warn',error);}}
+
+function invalidatePreviews(){
+ batchCache.clear();cachedSignature='';
+ if($36('v36Results'))$36('v36Results').hidden=true;
+}
+function resetMapPrompt(){
+ mapPromptSerial++;offeredMap=null;
+ const panel=$36('v39MapOffer'),buttons=$36('v39MapActions');
+ if(panel)panel.hidden=true;
+ if(buttons)buttons.hidden=true;
+}
+function mapPrompt(text,kind,withButtons=false){
+ const panel=$36('v39MapOffer'),message=$36('v39MapMessage'),actions=$36('v39MapActions');
+ if(!panel||!message||!actions)return;
+ panel.hidden=false;panel.dataset.kind=kind;
+ message.textContent=text;actions.hidden=!withButtons;
+}
+async function checkLocalMap(record=null,levelOverride=null){
+ const ticket=++mapPromptSerial;
+ const manager=window.FIELDNOTES_PACK_MANAGER;
+ const lon=state.centerLon,lat=state.centerLat;
+ offeredMap=null;
+ if(lon==null||lat==null||!Number.isFinite(Number(lon))||!Number.isFinite(Number(lat))){
+  resetMapPrompt();return;
+ }
+ if(!manager?.matchLocation){
+  mapPrompt('已准备基础地理轮廓，可直接生成作品。','base');return;
+ }
+ try{
+  await manager.ready;
+  if(ticket!==mapPromptSerial)return;
+  const level=levelOverride||record?.level||'city';
+  const match=manager.matchLocation(Number(lon),Number(lat),level);
+  if(!match){
+   const geo=record?.code?geometryFallback(record.code):null;
+   const boundary=geo?.approx?'对应区域暂用真实上级行政轮廓':'当前位置可使用基础地理轮廓';
+   mapPrompt(boundary+'；暂无可下载的精细街道包，不影响生成。','base');return;
+  }
+  const spec=match.spec;
+  const localFile=location.protocol==='file:';
+  const already=localFile
+   ? Boolean(window.FIELDNOTES_OFFLINE_TILES?.regions?.some(x=>x.code===spec.code))
+   : Boolean(await manager.installedInfo(spec));
+  if(ticket!==mapPromptSerial)return;
+  if(already){
+   mapPrompt('✓ '+spec.name+'中心局部精细街道已在本机。'+(match.complete?'可直接生成。':'当前位置临近预装范围边缘，仅部分街道可用。'),'installed');return;
+  }
+  if(!navigator.onLine||localFile||typeof caches==='undefined'){
+   mapPrompt('当前无法下载'+spec.name+'精细街道包。基础地图可正常出图。','base');return;
+  }
+  offeredMap=match;
+  mapPrompt(spec.name+'中心附近有更精细的街道和水系地图（'+(match.complete?'当前地点位于完整瓦片覆盖中心。':'当前地点在局部覆盖边缘，可能只有部分街道。')+'），下载可提升效果；也可以直接使用基础地图。',match.complete?'offer':'partial',true);
+  $36('v39MapDownload').textContent='下载'+spec.name+'地图';
+ }catch(e){
+  if(ticket!==mapPromptSerial)return;
+  mapPrompt('地图状态检查暂时失败，基础地图仍可出图。','base');
+ }
+}
+async function downloadSuggestedMap(){
+ const match=offeredMap,manager=window.FIELDNOTES_PACK_MANAGER;
+ if(!match||!manager)return;
+ const button=$36('v39MapDownload');
+ button.disabled=true;
+ mapPrompt('正在下载 '+match.spec.name+' 精细街道（只保存在本机，不上传照片）…','offer');
+ try{
+  await manager.install(match.spec);
+  await checkLocalMap(chosen,state.gpsFromPhoto?'gps':null);
+ }catch(e){
+  offeredMap=match;
+  mapPrompt('精细地图下载未成功：'+(e?.message||'请检查网络')+'。不影响使用基础地图。','partial',true);
+ }finally{button.disabled=false;}
+}
+
 function applyRecord(r){
- if(!r)return false;const geo=geometryFallback(r.code);chosen=r;
+ if(!r)return false;
+ if(chosen?.code!==r.code)invalidatePreviews();
+ const geo=geometryFallback(r.code);chosen=r;
  const text=[r.name,parentOf(r)].filter(x=>x&&x!=='中国').join(', ');
  $36('v36Location').value=r.name;$36('v36Choices').hidden=true;
  $36('placeName').value=text;$36('latInput').value='';$36('lonInput').value='';
@@ -73,12 +149,13 @@ function applyRecord(r){
   setNotice(note,geo.approx?'warn':'success');setPrecision(note,geo.approx);status(note,geo.approx);
  }else{state.centerLon=null;state.centerLat=null;state.pin=false;status('已识别 '+r.name+'，但该区域暂无可用边界，不会伪造地图。',true);}
  $36('v36Chosen').textContent='定位层级：'+(r.level==='province'?'省级':r.level==='city'?'市级':'区县级')+' · '+r.name;
- schedule();return true;
+ schedule();checkLocalMap(r);return true;
 }
 function syncRegionFromGPS(){
  if(state.centerLat==null||state.centerLon==null)return;
  $36('v36Chosen').textContent='照片 GPS '+state.centerLat.toFixed(4)+'°N · '+state.centerLon.toFixed(4)+'°E（设备记录）';
  status('已使用照片 EXIF 中的 GPS。如需改为省、市或区县，可以手动搜索。');
+ checkLocalMap(null,'gps');
 }
 const formerSync=syncLocation;
 syncLocation=function(){
@@ -117,8 +194,8 @@ function photoLoaded(){
  $36('v36Picture').hidden=false;$36('v36Initial').hidden=true;
  const c=$36('v36Original'),w=680,h=Math.round(w*state.photoH/state.photoW);c.width=w;c.height=h;c.getContext('2d').drawImage(state.image,0,0,w,h);
  $36('v36Filename').textContent=state.photoName+' · '+state.photoW+' × '+state.photoH;
- status('照片已载入。确认拍摄地区后，一键生成三种真实排版。');
- $36('v36Results').hidden=true;variants.length=0;drawRound=0;
+ status('照片已载入。确认拍摄地区后，一键生成六种精选版式。');
+ invalidatePreviews();variants.length=0;drawRound=0;
  if(state.gpsFromPhoto)syncRegionFromGPS();
  else{const p=$36('v36Location').value.trim();if(p){const hit=rank(p)[0];if(hit)applyRecord(hit);}}
 }
@@ -147,7 +224,9 @@ function planConfigs(){
  return[A,B,C];
 }
 function selectVariant(i){
- if(!variants[i])return;selected=i;const v=variants[i];for(const [j,btn] of [...$36('v36Options').children].entries())btn.classList.toggle('active',j===i);
+ if(!variants[i])return;selected=i;const v=variants[i];
+ const cached=batchCache.get(drawRound%2);if(cached)cached.selected=i;
+ for(const [j,btn] of [...$36('v36Options').children].entries())btn.classList.toggle('active',j===i);
  configure(v.cfg);state.v32Variant=v.kind==='frame'?'frame':'light';
  $36('v36SelectedLabel').textContent=v.label+' · '+v.desc;
  drawVariant($36('v36Hero'),v.cfg,Math.min(1100,Math.max(660,Math.round(state.photoW*.75))));schedule();
