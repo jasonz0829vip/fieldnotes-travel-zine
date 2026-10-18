@@ -122,3 +122,11 @@ body .v36-title p{max-width:560px}
  .v39-map-actions button{min-width:110px}
 }
 @media(max-width:380px){.v36-option canvas{height:125px}}
+
+/* V3.9.1: on phones, portrait photographs must be big enough to compare.
+   The previous 102–144px fixed canvas height made 6 portrait variants almost unreadable. */
+@media(max-width:720px){
+  #v36Options .v36-option canvas{
+    display:block;width:100%;height:auto;max-height:252px;object-fit:contain;
+  }
+}
