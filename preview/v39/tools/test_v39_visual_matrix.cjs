@@ -103,7 +103,7 @@ function differencePixels(base64Images){
     const t=Date.now();
     await page.locator(batch?'#v36Regenerate':'#v36Generate').click();
     const prefix=batch?'07':'01';
-    await page.waitForFunction(p=>document.querySelector('#v36Options b')?.textContent?.startsWith(p)&&!document.getElementById('v36Generate').disabled,{timeout:80000},prefix);
+    await page.waitForFunction(p=>document.querySelector('#v36Options b')?.textContent?.startsWith(p)&&!document.getElementById('v36Generate').disabled,prefix,{timeout:80000});
     times.push(Date.now()-t);
     const info=await page.locator('#v36Options button').evaluateAll(options=>options.map((node)=>{
       const canvas=node.querySelector('canvas');
