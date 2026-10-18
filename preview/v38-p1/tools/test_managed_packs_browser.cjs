@@ -45,7 +45,10 @@ function server() {
     assert.equal(ready.maps,0,'initially no detailed street map should be downloaded');
     assert(!ready.names.some(name=>name.startsWith('fn38p1-pack-')));
 
-    await page.locator('#fn38StorageBtn').click({force:true});
+    if (await page.locator('#v39Settings').count()) {
+      await page.locator('#v39Settings summary').click();
+    }
+    await page.locator('#fn38StorageBtn').click();
     await page.locator('#fn38StorageDialog').waitFor({state:'visible'});
     const shanghai=page.locator('.fn38PackRow').filter({hasText:'上海·黄浦'});
     await shanghai.getByRole('button',{name:'下载地图'}).click();
@@ -67,7 +70,10 @@ function server() {
     });
     assert.equal(offlineCount,9,'cold offline open must restore cached street data');
 
-    await page.locator('#fn38StorageBtn').click({force:true});
+    if (await page.locator('#v39Settings').count()) {
+      await page.locator('#v39Settings summary').click();
+    }
+    await page.locator('#fn38StorageBtn').click();
     await page.locator('.fn38PackRow').filter({hasText:'上海·黄浦'})
       .getByRole('button',{name:'删除地图'}).click();
     await page.waitForTimeout(850);
