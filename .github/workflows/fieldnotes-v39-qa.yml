@@ -13,12 +13,15 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 16
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Check P1 JavaScript syntax
         run: |
           node --check preview/v39/offline-pack-manager-v38.js
+          node --check preview/v39/v38-map-core.js
+          node --check preview/v39/p1-art-direction.js
+          node --check preview/v39/tools/test_p0_real_map_buildings.cjs
           node --check preview/v39/sw.js
           for file in preview/v39/packs/*.js; do node --check "$file"; done
       - name: Regenerate map packs and compare tracked results
@@ -38,6 +41,8 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
       - name: Real Chromium V3.9 location prompt and 6+6 gallery
         run: node preview/v39/tools/test_v39_three_step_browser.cjs
+      - name: P0 bundled building geometry and real Z13 offline coverage
+        run: node preview/v39/tools/test_p0_real_map_buildings.cjs
       - name: Save real Chromium screenshots for visual review
         if: always()
         uses: actions/upload-artifact@v4
