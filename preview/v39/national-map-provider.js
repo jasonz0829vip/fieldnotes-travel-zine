@@ -163,12 +163,16 @@
   indexRegion(record);announce({kind:'national',installed:true,tiles:record.tiles.length});
   return installedStatus(lon,lat);
  }
- async function remove(lon,lat){
-  await ready;const m=matched(lon,lat);
-  if(!m||!regions.has(m.id))return false;
-  const success=await caches.delete(m.id);
-  forgetRegion(m.id);announce({kind:'national',installed:false});
+ async function removeById(id){
+  await ready;
+  if(!regions.has(id))return false;
+  const success=await caches.delete(id);
+  forgetRegion(id);announce({kind:'national',installed:false});
   return success;
+ }
+ async function remove(lon,lat){
+  const m=matched(lon,lat);
+  return m?removeById(m.id):false;
  }
  async function list(){
   await ready;return [...regions.values()].map(r=>({
@@ -182,7 +186,7 @@
  }
  window.FIELDNOTES_NATIONAL_MAP=Object.freeze({
   configured,supported,ready,availability,installedStatus,bestZoom,
-  getCachedTile,install,remove,list,clearAll,xy,neighbors,
+  getCachedTile,install,remove,removeById,list,clearAll,xy,neighbors,
   sourceDescription:configured?'已配置的 PMTiles 静态地图源':'等待可在中国普通网络访问的数据源'
  });
 })();
