@@ -198,12 +198,12 @@ not authoritative GPS positions or turn-by-turn navigation data.
 </head>
 <body class="v36-basic">
 <header class="top">
- <div class="brand"><div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#496454" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M10 10L16 8L14 14L8 16Z"/></svg></div><div class="brandtext"><b>FIELDNOTES</b><small>TRAVEL ZINE · STUDIO V3.9</small></div></div>
- <div class="top-right"><span class="offline">V3.9 · 三步创作 · 12 款地图视觉</span><button class="simple-btn" id="helpBtn" type="button">使用指南 ↗</button></div>
+ <div class="brand"><div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#496454" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M10 10L16 8L14 14L8 16Z"/></svg></div><div class="brandtext"><b>FIELDNOTES</b><small>TRAVEL ZINE · STUDIO V3.8-P1</small></div></div>
+ <div class="top-right"><span class="offline">V3.8-P1 · 地图可管理 · 照片本地处理</span><button class="simple-btn" id="helpBtn" type="button">使用指南 ↗</button></div>
 </header>
 <div id="v36Back"><button type="button" id="v36BackButton">← 返回一键创作</button></div>
 <section id="v36Flow" aria-label="FIELDNOTES 一键创作">
- <div class="v36-title"><small>FIELDNOTES · V3.9 / THREE STEPS</small><h1>把旅行照片，变成作品。</h1><p>① 拍照或上传 → ② 选择地点（可选精细地图）→ ③ 一键看六款。</p></div>
+ <div class="v36-title"><small>FIELDNOTES · V3.8 P1 / ART DIRECTION</small><h1>把旅行照片，变成作品。</h1><p>拍照或上传 → 选择地点 → 一键出三版。不满意，再换一组。</p></div>
  <div class="v36-grid">
   <section class="v36-panel" aria-label="第一步导入照片">
    <h2>01 · 你的旅行照片</h2>
@@ -215,38 +215,24 @@ not authoritative GPS positions or turn-by-turn navigation data.
   <section class="v36-panel" aria-label="第二步选择地点">
    <h2>02 · 拍摄地点</h2>
    <div class="v36-fieldset"><div class="v36-searchline"><input id="v36Location" type="search" placeholder="输入省、市、区县，例如海南陵水" autocomplete="off" aria-label="拍摄地点"><button id="v36LocationClear" type="button" aria-label="清空地点">×</button></div><div id="v36Choices" hidden></div></div>
-   <div id="v36Chosen" class="v36-hint">可只选省、市或区县；暂不识别具体门牌号。</div>
-   <div id="v39MapOffer" class="v39-map-offer" hidden role="status" aria-live="polite">
-    <p id="v39MapMessage"></p>
-    <div id="v39MapActions" class="v39-map-actions" hidden>
-     <button id="v39MapDownload" type="button">下载精细地图</button>
-     <button id="v39MapSkip" type="button">使用基础地图继续</button>
-    </div>
-   </div>
-   <p class="v36-helper">地图按已选地点自动检查；精细街道可选下载，不下载也能生成作品。</p>
+   <div id="v36Chosen" class="v36-hint">可只选省，不强制填写市、区县或 GPS。</div>
+   <label class="v36-check"><input id="v36AutoTone" type="checkbox" checked> 智能轻修 · 不改变原片文件</label>
+   <button id="v36Generate" class="v36-generate" type="button">✦ 一键智能出图 × 3</button>
+   <p class="v36-helper">自动比较画面纹理和留白，选择更适合的版式；地图使用设备内置真实区域数据。</p>
   </section>
  </div>
- <section class="v36-panel v39-generate-panel" aria-label="第三步生成作品">
-  <h2>03 · 一键生成六张旅行作品</h2>
-  <label class="v36-check"><input id="v36AutoTone" type="checkbox" checked> 智能轻修 · 保留原片文件</label>
-  <button id="v36Generate" class="v36-generate" type="button">✦ 一键智能出图 × 6</button>
-  <p class="v36-helper">先在手机本地快速生成六张轻量预览；点选满意的作品，再高清导出。不需要下载地图也能使用。</p>
- </section>
  <div id="v36Status" class="v36-status" role="status" aria-live="polite">正在加载离线地图库…</div>
  <section id="v36Results" class="v36-result" hidden>
-  <div class="v36-result-header"><h2>你的六张旅行作品</h2><small>两组各六款 · 本地合成 · 不重绘原片</small></div>
+  <div class="v36-result-header"><h2>你的三张旅行作品</h2><small>本地真实合成 · 不重绘原片</small></div>
   <div class="v36-hero-wrap"><canvas id="v36Hero" aria-label="选中的旅行摄影作品大图"></canvas></div>
   <p id="v36SelectedLabel" class="v36-selected"></p>
-  <div id="v36Options" class="v36-options" aria-label="当前六种可选择的作品"></div>
-  <div class="v36-controls"><button id="v36Regenerate" type="button">↻ 下一组 6 款（7—12）</button><button id="v36Save" class="main" type="button">↥ 保存 / 分享作品</button></div>
-  <p id="v36Feedback" class="v36-helper">第 1 组：01—06 · 下一组：07—12。点击下一组可以循环切换。</p>
-  <p class="v36-footnote">12 款采用已有的不同地理杂志构图。预览只在本机绘制；无精准 GPS 时坐标仅代表区域中心。</p>
+  <div id="v36Options" class="v36-options" aria-label="可选择的三种作品"></div>
+  <div class="v36-controls"><button id="v36Regenerate" type="button">↻ 不满意，再来一组</button><button id="v36Save" class="main" type="button">↥ 保存 / 分享作品</button></div>
+  <p id="v36Feedback" class="v36-helper">不用回到设置页，可直接指定下一轮的调整方向。</p>
+  <div class="v36-chips"><button data-v36feedback="original" type="button">更保留原图</button><button data-v36feedback="editorial" type="button">更有杂志感</button><button data-v36feedback="soft" type="button">颜色更柔和</button><button data-v36feedback="map" type="button">地图更明显</button></div>
+  <p class="v36-footnote">“再来一组”是离线规则重排：换构图、地图配色和版式。它不是云端 AI 重绘，原片像素得以保留。</p>
  </section>
- <div class="v36-extras">
-  <details id="v39Settings"><summary>设置 / 离线地图管理</summary><div class="v39-settings-panel">
-   <button id="v36Advanced" type="button">打开高级编辑（保护框、精确地图、透明图层等） ↗</button>
-  </div></details>
-  <p id="v36AtlasCount"></p></div>
+ <div class="v36-extras"><button id="v36Advanced" type="button">打开高级编辑（保护框、精确地图、透明图层等） ↗</button><p id="v36AtlasCount"></p></div>
 </section>
 
 <main class="layout">

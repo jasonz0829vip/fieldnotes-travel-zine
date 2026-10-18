@@ -1,0 +1,10 @@
+FIELDNOTES V3.8 P1 — EXPERIMENTAL ART DIRECTION, INDEPENDENT FROM THE TESTED P0 PREVIEW
+The first "one-click" group: SKY ATLAS (broad street network gradient), COAST & WATER (true hydrographic map in radial fade), PURE COORDINATES (small inset map seal).
+The next group: NIGHT CARTOGRAPHY (gold illuminated streets), URBAN BLUEPRINT (in-image vertical technical map), FIELD JOURNAL (editorial typography).
+These are different geometry, layout and emphasis, not simply opacity or theme changes. Six curated families only; no claim of 12 unique templates.
+Real roads and waterways come solely from preinstalled OpenStreetMap-based tiles. Region center coordinates are clearly marked APPROX.; never treated as photo GPS.
+Manual subject-protection rectangles from the editor apply to map layers; reliable automatic person/animal segmentation is not in this P1 iteration.
+iPhone and Android photo imports and save/share scripts are unchanged. All new art is in p1-art-direction.js.
+Stable / and /preview/v38/ versions stay unchanged. This P1 preview uses its own PWA service-worker cache scope.
+
+After all six curated layouts are shown, the interface does not claim newly generated templates; feedback chips re-prioritize the same curated styles.

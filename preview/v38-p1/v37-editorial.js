@@ -443,6 +443,5 @@ paint=function(ctx,w,h,options={}){
  ctx.restore();
  ctx.restore();
 };
-function invalidateMap(){lastKey='';mapResult=null;inflight=null;lastError='';mapInfo.status='idle';mapInfo.tiles=0;renderedVersion++;}
-window.FIELDNOTES_V37_DEBUG={prepare,plans,getMap:()=>mapResult,info:mapInfo,presets,renderedVersion:()=>renderedVersion,invalidate:invalidateMap};
+window.FIELDNOTES_V37_DEBUG={prepare,plans,getMap:()=>mapResult,info:mapInfo,presets,renderedVersion:()=>renderedVersion};
 })();
