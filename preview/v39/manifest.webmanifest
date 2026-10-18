@@ -1,0 +1,25 @@
+{
+  "name": "FIELDNOTES V3.9 · 摄影地理美学预览",
+  "short_name": "FIELDNOTES",
+  "description": "三步创作 + 12款现有地理视觉 + 独立可删地图包",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#f7f6f2",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
