@@ -36,3 +36,13 @@ CI 使用 **临时** real OSM 杭州市中心 Z14 九瓦片（OpenFreeMap 限额
 5. **不将临时 OSM PBF / PMTiles archive 上传 GitHub 或作为 artifact 保存**，仅测试日志。个人照片完全不参与测试。
 
 **后续尚须交付**：合法覆盖全国的静态 PMTiles 文件 + 中国普通网络可达的免费或可接受成本托管入口 + 真机安卓微信/iPhone 保存。测试中的临时杭州归属只能证明按坐标读取链路可运行，不能证明全国数据完备。
+
+
+## 国内无自有域名的现实边界（2026-10-18 核验）
+
+- 官方 Geofabrik 中国 OSM 最新 extract 当前约 **1.5 GB**，不是可以直接塞进手机的离线文件。Planetiler 能把它加工成 PMTiles，但官方建议工作磁盘空间为输入 PBF 的约 5–10 倍，实际产物大小需在真实构建后测量；不要提前许诺几 MB 就可覆盖全国。
+- 腾讯云 COS 官方确认 2024-01-01 后新建桶默认域名的静态网站预览被限制；阿里云 OSS 官方确认 2025-03-20 后新开通的大陆地域 bucket 用默认外网域名访问数据接口受到限制。不能把这两类默认域名说成已验收的免费永久公开站点。部署平台的公有 URL 必须分别通过实际 **HTTPS Range 206 / CORS / 无代理中国电信与移动网络** 检测。
+- 目前还没有经确认的国内普通网络长期稳定 HTTPS 全国 PMTiles 提供方。请在取得合法数据源和中国内地可用的分发入口前保留 `enabled:false`，PR 不合并到稳定入口。
+- OpenFreeMap 官方仅允许用户在每次限定下载中最多 3,000 张瓦片或 50 MB，且最多 4 个并发；研究下载已严格限制并没有将第三方瓦片公开归档。**不得把该公共服务直接当成我们可无上限转载的全国静态数据源。**
+
+来源：[Geofabrik China](https://download.geofabrik.de/asia/china.html)、[Planetiler](https://github.com/onthegomap/planetiler)、[Tencent COS 默认域名政策](https://cloud.tencent.com/document/faq/436/102489)、[Alibaba OSS 域名策略](https://www.alibabacloud.com/help/zh/oss/user-guide/regions-and-endpoints)、[OpenFreeMap ToS](https://openfreemap.org/tos/)。
